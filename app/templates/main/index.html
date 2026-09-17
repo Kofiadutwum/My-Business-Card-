@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% from "_macros.html" import contact_card %}
+
+{% block title %}{{ config.SITE_NAME }} — one contact card, shared in a tap{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-glow drifting" aria-hidden="true"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <h1 class="hero-title enter enter-1">Your contact details, saved in one tap.</h1>
+      <p class="hero-lede enter enter-2">
+        Build a card once. Share it with a link, a QR code or an NFC tag. Whoever
+        receives it saves your name, number and social handles straight to their
+        phone — no app to install on their side.
+      </p>
+      <div class="hero-actions enter enter-3">
+        <a class="btn btn-primary btn-large press" href="{{ url_for('auth.register') }}">Build my card</a>
+        <a class="btn btn-ghost btn-large press" href="{{ url_for('main.pricing') }}">See pricing</a>
+        <a class="btn btn-ghost btn-large press"
+           href="https://wa.me/233{{ config.SUPPORT_PHONE[1:] }}" rel="noopener">Talk to us</a>
+      </div>
+      <div class="hero-proof enter enter-4">
+        <div>
+          <strong class="proof-figure">One tap</strong>
+          <span class="proof-label">to save your details</span>
+        </div>
+        <div>
+          <strong class="proof-figure">MoMo</strong>
+          <span class="proof-label">or card payment</span>
+        </div>
+        <div>
+          <strong class="proof-figure">Works offline</strong>
+          <span class="proof-label">once the card is saved</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      {% set demo = namespace() %}
+      {{ contact_card(demo_profile, vcf_url=None, interactive=true) }}
+      <p class="preview-label">Move your pointer across the card.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Three steps, then you are sharing</h2>
+      <p>No design work, no printer, no reorder when your number changes.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step reveal">
+        <h3>Enter your details</h3>
+        <p>Name, job title, organisation, phone, email and as many social handles as your plan allows.</p>
+      </div>
+      <div class="step reveal reveal-2">
+        <h3>Choose a plan</h3>
+        <p>Pay by MTN MoMo, Telecel Cash, AirtelTigo Money or card. One payment covers a full year.</p>
+      </div>
+      <div class="step reveal reveal-3">
+        <h3>Share the card</h3>
+        <p>Send the link, show the QR code, or write it to an NFC tag. Update it any time — the link never changes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap split">
+    <div class="reveal">
+      <h2>Why a card beats a saved screenshot</h2>
+      <p>
+        A screenshot of your details sits in someone's gallery and is never
+        found again. A card downloads a proper contact file — the kind the phone
+        already understands — so your name appears when you call, and your
+        details are searchable in their contacts from that moment on.
+      </p>
+      <p>
+        When your number or your job changes, the card changes. The person who
+        saved it last year still reaches you.
+      </p>
+    </div>
+
+    <div class="panel reveal reveal-2">
+      <h3>Built for how business is done here</h3>
+      <p class="text-small muted">
+        Payment by mobile money as the first option, not an afterthought.
+        Ghanaian phone number formats accepted as people actually write them.
+        Pages kept light enough to open on a slow connection.
+      </p>
+      <a class="btn btn-dark press" href="{{ url_for('auth.register') }}">Start free</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Plans</h2>
+      <p>Billed once a year. The card stops resolving when a plan lapses, and comes straight back when it is renewed.</p>
+    </div>
+
+    <div class="plan-grid">
+      {% for key, plan in plans.items() %}
+        <div class="panel lift reveal reveal-{{ loop.index }}">
+          <h3>{{ plan.label }}</h3>
+          <p class="stat-value">{{ currency }} {{ '%.0f'|format(plan.amount_minor / 100) }}</p>
+          <p class="text-small muted">per year</p>
+          <p class="text-small">{{ plan.blurb }}</p>
+          <a class="btn {% if key == 'professional' %}btn-primary{% else %}btn-ghost{% endif %} btn-block press"
+             href="{{ url_for('auth.register') }}">Choose {{ plan.label }}</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

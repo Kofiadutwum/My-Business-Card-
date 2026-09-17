@@ -1,0 +1,83 @@
+{% extends "admin/_shell.html" %}
+{% from "_macros.html" import status_badge %}
+
+{% block title %}Clients — {{ config.SITE_NAME }}{% endblock %}
+
+{% block console %}
+<div class="console-head enter">
+  <div>
+    <h1>Clients</h1>
+    <p>{{ rows|length }} shown.</p>
+  </div>
+</div>
+
+<form class="admin-filters enter enter-1" method="get">
+  <input type="search" name="q" value="{{ search }}" placeholder="Search by email" aria-label="Search clients">
+  <div class="pill-nav">
+    <a href="{{ url_for('admin.clients', q=search) }}" aria-current="{{ 'true' if state == 'all' else 'false' }}">All</a>
+    <a href="{{ url_for('admin.clients', q=search, state='active') }}" aria-current="{{ 'true' if state == 'active' else 'false' }}">Paying</a>
+    <a href="{{ url_for('admin.clients', q=search, state='expired') }}" aria-current="{{ 'true' if state == 'expired' else 'false' }}">Lapsed</a>
+  </div>
+  <button type="submit" class="btn btn-dark btn-small press">Search</button>
+</form>
+
+<div class="panel panel-flush enter enter-2">
+  {% if rows %}
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Plan</th>
+            <th>Status</th>
+            <th>Expires</th>
+            <th class="num">Lifetime spend</th>
+            <th class="num">Card opens</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td>
+                <div class="client-identity">
+                  <span class="client-avatar" aria-hidden="true">
+                    {{ row.profile.initials if row.profile else '?' }}
+                  </span>
+                  <div>
+                    <strong>{{ row.profile.full_name if row.profile else '—' }}</strong>
+                    <span>{{ row.user.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                {% if row.subscription %}
+                  {{ config.PLANS[row.subscription.plan].label if row.subscription.plan in config.PLANS else row.subscription.plan }}
+                {% else %}<span class="cell-muted">None</span>{% endif %}
+              </td>
+              <td>
+                {% if row.user.is_suspended %}
+                  <span class="badge badge-expired"><span class="badge-dot"></span>Suspended</span>
+                {% else %}
+                  {{ status_badge(row.status) }}
+                {% endif %}
+              </td>
+              <td class="cell-muted">{{ row.subscription.expires_at | day if row.subscription else '—' }}</td>
+              <td class="num money-figure">{{ row.spend | money }}</td>
+              <td class="num">{{ row.views }}</td>
+              <td>
+                <a class="btn btn-ghost btn-small press" href="{{ url_for('admin.client_detail', user_id=row.user.id) }}">Open</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty">
+      <h3>No clients match</h3>
+      <p>Clear the search, or widen the filter.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

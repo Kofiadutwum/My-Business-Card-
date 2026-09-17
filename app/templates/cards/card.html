@@ -1,0 +1,117 @@
+{#
+  The public card. Deliberately does NOT extend base.html: no site header, no
+  navigation, no footer links. A recipient opening this should see one thing
+  and one action, not a product being marketed at them.
+#}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ profile.full_name }}{% if profile.job_title %} — {{ profile.job_title }}{% endif %}</title>
+  <meta name="description" content="Contact card for {{ profile.full_name }}{% if profile.organisation %}, {{ profile.organisation }}{% endif %}.">
+
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="{{ profile.full_name }}">
+  <meta property="og:description" content="{{ profile.job_title or '' }}{% if profile.organisation %} at {{ profile.organisation }}{% endif %}">
+  <meta property="og:url" content="{{ card_url }}">
+  {% if profile.avatar_filename %}
+    <meta property="og:image" content="{{ config.SITE_URL }}{{ url_for('static', filename='img/avatars/' ~ profile.avatar_filename) }}">
+  {% endif %}
+
+  <link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+  <meta name="theme-color" content="#3070ae">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}">
+</head>
+<body class="accent-{{ profile.accent or 'blue' }}">
+  <main class="card-page">
+    <div class="card-page-inner">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-stack-inline" role="status" aria-live="polite">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }} toast"><p>{{ message }}</p></div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% from "_macros.html" import contact_card %}
+      {{ contact_card(profile, vcf_url=vcf_url, interactive=true) }}
+
+      {% if config.LEADS_ENABLED %}
+        {#
+          The exchange a paper card cannot do. <details> rather than a JS
+          toggle: it opens without scripting, it is keyboard-operable for
+          free, and the browser handles the accessibility semantics.
+        #}
+        <details class="exchange" {% if open_form %}open{% endif %}>
+          <summary class="exchange-summary">
+            <span>Share your details back</span>
+            <span class="exchange-chevron" aria-hidden="true">+</span>
+          </summary>
+
+          <form class="exchange-form" method="post"
+                action="{{ url_for('cards.connect', slug=profile.slug) }}" novalidate data-guard>
+            {{ lead_form.hidden_tag() }}
+
+            {# Honeypot. Hidden by CSS, never by an inline style. #}
+            <div class="honeypot" aria-hidden="true">
+              {{ lead_form.website.label }}
+              {{ lead_form.website(tabindex="-1", autocomplete="off") }}
+            </div>
+
+            <div class="field {% if lead_form.name.errors %}field-error{% endif %}">
+              {{ lead_form.name.label }}
+              {{ lead_form.name(placeholder="Your name", autocomplete="name") }}
+              {% for error in lead_form.name.errors %}
+                <span class="error-text">{{ error }}</span>
+              {% endfor %}
+            </div>
+
+            <div class="field {% if lead_form.phone.errors %}field-error{% endif %}">
+              {{ lead_form.phone.label }}
+              {{ lead_form.phone(placeholder="0244123456", autocomplete="tel") }}
+              {% for error in lead_form.phone.errors %}
+                <span class="error-text">{{ error }}</span>
+              {% endfor %}
+            </div>
+
+            <div class="field {% if lead_form.email.errors %}field-error{% endif %}">
+              {{ lead_form.email.label }}
+              {{ lead_form.email(placeholder="you@example.com", autocomplete="email") }}
+              {% for error in lead_form.email.errors %}
+                <span class="error-text">{{ error }}</span>
+              {% endfor %}
+            </div>
+
+            <div class="field">
+              {{ lead_form.organisation.label }}
+              {{ lead_form.organisation(placeholder="Optional") }}
+            </div>
+
+            {{ lead_form.submit(class="btn btn-primary btn-block press",
+                                **{"data-busy-label": "Sending…"}) }}
+            <p class="exchange-note">
+              Your details go only to {{ profile.full_name.split()[0] }}.
+            </p>
+          </form>
+        </details>
+      {% endif %}
+
+      <div class="qr-panel">
+        {{ qr | safe }}
+        <p>Point another phone at this code to pass the card on.</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>

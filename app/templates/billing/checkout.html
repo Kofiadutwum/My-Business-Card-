@@ -1,0 +1,99 @@
+{% extends "dashboard/_shell.html" %}
+
+{% block title %}Plan and payment — {{ config.SITE_NAME }}{% endblock %}
+
+{% block console %}
+<div class="console-head enter">
+  <div>
+    <h1>{% if subscription and subscription.status == 'active' %}Renew your plan{% else %}Choose a plan{% endif %}</h1>
+    <p>
+      {% if subscription and subscription.status == 'active' %}
+        Paying now adds a year to {{ subscription.expires_at | day }}, not to today.
+        You lose nothing by renewing early.
+      {% else %}
+        One payment covers twelve months.
+      {% endif %}
+    </p>
+  </div>
+</div>
+
+<form method="post" novalidate data-guard>
+  {{ form.hidden_tag() }}
+
+  <div class="panel enter enter-1">
+    <h3>Plan</h3>
+    <div class="plan-options">
+      {% for key, plan in plans.items() %}
+        <label class="plan-option">
+          <input type="radio" name="plan" value="{{ key }}"
+                 {% if form.plan.data == key %}checked{% endif %}>
+          <span class="plan-option-main">
+            <strong>{{ plan.label }}</strong>
+            <span>{{ plan.blurb }}</span>
+          </span>
+          <span class="plan-price">
+            {{ currency }} {{ '%.0f'|format(plan.amount_minor / 100) }}
+            <small>per year</small>
+          </span>
+        </label>
+      {% endfor %}
+    </div>
+    {% for error in form.plan.errors %}<span class="error-text">{{ error }}</span>{% endfor %}
+  </div>
+
+  <div class="panel enter enter-2">
+    <h3>Payment method</h3>
+
+    <div class="channel-tabs">
+      <label class="channel-tab">
+        <input type="radio" name="channel" value="mobile_money"
+               {% if form.channel.data != 'card' %}checked{% endif %}>
+        <strong>Mobile money</strong>
+        <span>MTN, Telecel or AirtelTigo</span>
+      </label>
+      <label class="channel-tab">
+        <input type="radio" name="channel" value="card"
+               {% if form.channel.data == 'card' %}checked{% endif %}>
+        <strong>Card</strong>
+        <span>Visa or Mastercard</span>
+      </label>
+    </div>
+
+    <div class="momo-panel" data-momo-panel>
+      <div class="field {% if form.momo_provider.errors %}field-error{% endif %}">
+        {{ form.momo_provider.label }}
+        {{ form.momo_provider() }}
+      </div>
+      <div class="field {% if form.momo_phone.errors %}field-error{% endif %}">
+        {{ form.momo_phone.label }}
+        {{ form.momo_phone(placeholder="0244123456", autocomplete="tel") }}
+        {% for error in form.momo_phone.errors %}<span class="error-text">{{ error }}</span>{% endfor %}
+        <span class="field-hint">
+          A prompt goes to this number. Approve it with your MoMo PIN and the card
+          activates on its own.
+        </span>
+      </div>
+    </div>
+
+    {{ form.submit(class="btn btn-primary btn-block btn-large press", **{"data-busy-label": "Sending request…"}) }}
+
+    {% if sandbox %}
+      <p class="sandbox-note">
+        Simulation mode. No gateway keys are configured, so payments complete
+        instantly without charging anything. Set PAYMENT_SANDBOX=0 in .env with
+        live Paystack keys when you are ready to take real money.
+      </p>
+    {% endif %}
+  </div>
+</form>
+
+<div class="panel enter enter-3">
+  <h3>What you are paying for</h3>
+  <p class="text-small muted">
+    Twelve months of your card resolving at its link, with the QR code, the
+    contact file and the analytics that come with your chosen plan. If the plan
+    lapses the card stops resolving after a {{ config.GRACE_PERIOD_DAYS }}-day
+    grace period, and your details are kept rather than deleted.
+  </p>
+</div>
+{% endblock %}

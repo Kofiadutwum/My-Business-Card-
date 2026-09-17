@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Something broke on our side — {{ config.SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="wrap wrap-narrow">
+    <div class="panel enter">
+      <h1>Something broke on our side</h1>
+      <p class="muted">This one is our fault, not yours. Try again in a moment — nothing you had saved has been lost.</p>
+      <a class="btn btn-primary press" href="{{ url_for('main.index') }}">Back to the start</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

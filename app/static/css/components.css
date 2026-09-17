@@ -1,0 +1,517 @@
+/* ==========================================================================
+   components.css — buttons, badges, panels, tables, charts, flash messages
+   ========================================================================== */
+
+/* --- buttons ------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  font-family: inherit;
+  font-size: var(--t-small);
+  font-weight: 600;
+  line-height: 1;
+  /* Montserrat's letterforms are wide, so button labels need less side
+     padding than a narrower face would to reach the same optical weight.
+     Left at 1.35rem, "Download the contact file" wraps on a phone. */
+  padding: 0.8rem 1.15rem;
+  letter-spacing: var(--track-body);
+  border-radius: var(--r-control);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform var(--fast) var(--ease-out),
+    box-shadow var(--medium) var(--ease-out),
+    background var(--fast) var(--ease-out),
+    border-color var(--fast) var(--ease-out);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* White, not ink. Dark text on this blue measures 3.05:1, which fails
+   WCAG AA for body-sized text; white measures 5.18:1 and passes. The old
+   palette's yellow was light enough for dark text — this blue is not, and
+   inheriting that assumption would have shipped an unreadable button. */
+.btn-primary {
+  background: var(--blue);
+  color: #ffffff;
+  box-shadow: var(--edge), var(--lift-1);
+}
+
+.btn-primary:hover {
+  background: var(--blue-deep);
+  color: #ffffff;
+  box-shadow: var(--lift-accent);
+  transform: translateY(-2px);
+}
+
+.btn-dark {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-dark:hover {
+  background: var(--ink-soft);
+  transform: translateY(-2px);
+  box-shadow: var(--lift-2);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.btn-ghost:hover {
+  border-color: var(--ink);
+  background: var(--surface);
+}
+
+.btn-danger {
+  background: var(--ember-wash);
+  color: var(--ember);
+  border-color: transparent;
+}
+
+.btn-danger:hover {
+  background: var(--ember);
+  color: #fff;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-small {
+  padding: 0.5rem 0.75rem;
+  font-size: var(--t-micro);
+  letter-spacing: var(--track-micro);
+}
+
+.btn-large {
+  padding: 1rem 1.75rem;
+  font-size: var(--t-body);
+}
+
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* --- badges -------------------------------------------------------------- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 0.25rem 0.65rem;
+  letter-spacing: var(--track-micro);
+  border-radius: var(--r-chip);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.badge-active {
+  background: var(--jade-wash);
+  color: var(--jade);
+}
+
+.badge-grace {
+  background: var(--amber-wash);
+  color: var(--amber-deep);
+}
+
+.badge-expired {
+  background: var(--ember-wash);
+  color: var(--ember);
+}
+
+.badge-neutral {
+  background: var(--surface-sunk);
+  color: var(--ash);
+}
+
+.badge-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* --- panels -------------------------------------------------------------- */
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: var(--s-6);
+  box-shadow: var(--edge), var(--lift-1);
+}
+
+.panel-flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  margin-bottom: var(--s-5);
+  flex-wrap: wrap;
+}
+
+.panel-head h2,
+.panel-head h3 {
+  margin: 0;
+}
+
+.panel-head p {
+  margin: 0;
+  color: var(--ash);
+  font-size: var(--t-small);
+}
+
+/* Vertical spacing for panels stacked in normal flow. */
+.panel + .panel {
+  margin-top: var(--s-5);
+}
+
+/* ...but siblings inside a grid are laid out side by side, and the rule
+   above pushed every panel except the first down by 24px. Grid `gap`
+   already handles the spacing, so the margin is cancelled here. CSS cannot
+   ask "is my parent a grid?", so the containers are named explicitly. */
+.plan-grid > .panel + .panel,
+.admin-grid > .panel + .panel,
+.share-grid > .panel + .panel,
+.editor > .panel + .panel,
+.finance-summary > .panel + .panel,
+.stat-row > .panel + .panel {
+  margin-top: 0;
+}
+
+/* --- statistics ---------------------------------------------------------- */
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--s-4);
+}
+
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: var(--s-5);
+  box-shadow: var(--edge);
+}
+
+.stat-value {
+  display: block;
+  font-size: var(--t-h2);
+  font-weight: 800;
+  letter-spacing: var(--track-display);
+  line-height: 1.05;
+  margin-bottom: var(--s-1);
+}
+
+.stat-label {
+  font-size: var(--t-micro);
+  color: var(--ash);
+}
+
+.stat-delta {
+  font-size: var(--t-micro);
+  font-weight: 600;
+  margin-left: var(--s-2);
+}
+
+.stat-up { color: var(--jade); }
+.stat-down { color: var(--ember); }
+
+.stat-accent {
+  border-color: var(--blue);
+  background: linear-gradient(180deg, var(--blue-wash), var(--surface) 65%);
+  box-shadow: var(--edge), inset 3px 0 0 var(--amber);
+}
+
+/* --- charts --------------------------------------------------------------
+   Drawn as inline SVG. Bar heights and line paths are SVG geometry
+   attributes, not CSS, which is how the charts stay data-driven without a
+   single style attribute in the markup.
+   ------------------------------------------------------------------------- */
+
+.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.chart-bar {
+  fill: var(--blue);
+}
+
+.chart-bar-muted {
+  fill: var(--line-strong);
+}
+
+.chart-bar:hover {
+  fill: var(--blue-deep);
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--jade);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-area {
+  fill: var(--jade-wash);
+  opacity: 0.55;
+}
+
+.chart-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.chart-axis {
+  fill: var(--ash);
+  font-size: 10px;
+  font-family: var(--font);
+}
+
+.chart-caption {
+  font-size: var(--t-micro);
+  color: var(--ash);
+  margin-top: var(--s-3);
+}
+
+.chart-empty {
+  display: grid;
+  place-items: center;
+  min-height: 9rem;
+  color: var(--ash);
+  font-size: var(--t-small);
+  background: var(--surface-sunk);
+  border-radius: var(--r-control);
+  text-align: center;
+  padding: var(--s-5);
+}
+
+/* Horizontal share bars, built on native <progress>. */
+.share-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-4);
+}
+
+.share-row {
+  display: grid;
+  grid-template-columns: 8rem 1fr auto;
+  gap: var(--s-4);
+  align-items: center;
+  font-size: var(--t-small);
+}
+
+.share-row strong {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- tables -------------------------------------------------------------- */
+
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-small);
+}
+
+thead th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--ash);
+  font-size: var(--t-micro);
+  letter-spacing: var(--track-micro);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  background: var(--surface-sunk);
+}
+
+tbody td {
+  padding: var(--s-4);
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+tbody tr {
+  transition: background var(--fast) var(--ease-out);
+}
+
+tbody tr:hover {
+  background: var(--surface-sunk);
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.cell-muted {
+  color: var(--ash);
+}
+
+/* --- flash messages ------------------------------------------------------ */
+
+.flash-stack {
+  position: fixed;
+  top: 5.25rem;
+  right: var(--s-5);
+  z-index: 60;
+  display: grid;
+  gap: var(--s-3);
+  width: min(24rem, calc(100vw - 2rem));
+}
+
+.flash {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--lift-2);
+  font-size: var(--t-small);
+  line-height: var(--leading-snug);
+}
+
+.flash-success { border-left: 4px solid var(--jade); }
+.flash-error { border-left: 4px solid var(--ember); }
+.flash-warning { border-left: 4px solid var(--amber); }
+.flash-info { border-left: 4px solid var(--ash); }
+
+.flash p {
+  margin: 0;
+  flex: 1;
+}
+
+.flash-close {
+  background: none;
+  border: 0;
+  color: var(--ash);
+  cursor: pointer;
+  font-size: var(--t-body);
+  line-height: 1;
+  padding: 0 var(--s-1);
+}
+
+.flash-close:hover {
+  color: var(--ink);
+}
+
+/* --- empty states -------------------------------------------------------- */
+
+.empty {
+  text-align: center;
+  padding: var(--s-8) var(--s-5);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+}
+
+.empty h3 {
+  margin-bottom: var(--s-2);
+}
+
+.empty p {
+  color: var(--ash);
+  margin-inline: auto;
+  margin-bottom: var(--s-5);
+  max-width: 28rem;
+}
+
+/* --- misc ---------------------------------------------------------------- */
+
+.stack > * + * {
+  margin-top: var(--s-4);
+}
+
+.row {
+  display: flex;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.row-between {
+  justify-content: space-between;
+}
+
+.muted {
+  color: var(--ash);
+}
+
+.text-small { font-size: var(--t-small); }
+.text-micro { font-size: var(--t-micro); }
+
+.copy-field {
+  display: flex;
+  gap: var(--s-2);
+  align-items: stretch;
+}
+
+.copy-field input {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: var(--t-small);
+  background: var(--surface-sunk);
+}
+
+.pill-nav {
+  display: inline-flex;
+  gap: var(--s-1);
+  background: var(--surface-sunk);
+  padding: var(--s-1);
+  border-radius: var(--r-chip);
+}
+
+.pill-nav a {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--r-chip);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--ash);
+  transition: background var(--fast) var(--ease-out), color var(--fast) var(--ease-out);
+}
+
+.pill-nav a[aria-current="true"] {
+  background: var(--surface);
+  color: var(--purple);
+  box-shadow: var(--lift-1);
+}

@@ -1,0 +1,53 @@
+{% extends "dashboard/_shell.html" %}
+{% from "_macros.html" import status_badge %}
+
+{% block title %}Receipts — {{ config.SITE_NAME }}{% endblock %}
+
+{% block console %}
+<div class="console-head enter">
+  <div>
+    <h1>Receipts</h1>
+    <p>Every payment on this account.</p>
+  </div>
+</div>
+
+<div class="panel panel-flush enter enter-1">
+  {% if payments %}
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Reference</th>
+            <th>Plan</th>
+            <th>Method</th>
+            <th class="num">Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for payment in payments %}
+            <tr>
+              <td>{{ (payment.paid_at or payment.created_at) | day }}</td>
+              <td class="cell-muted">{{ payment.reference }}</td>
+              <td>{{ config.PLANS[payment.plan].label if payment.plan in config.PLANS else payment.plan }}</td>
+              <td>
+                {% if payment.channel == 'card' %}Card
+                {% else %}{{ payment.momo_provider|upper if payment.momo_provider else 'MoMo' }}{% endif %}
+              </td>
+              <td class="num money-figure">{{ payment.amount_minor | pesewas }}</td>
+              <td>{{ status_badge(payment.status) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty">
+      <h3>No payments yet</h3>
+      <p>Once you choose a plan, every receipt appears here.</p>
+      <a class="btn btn-primary press" href="{{ url_for('billing.checkout') }}">Choose a plan</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "dashboard/_shell.html" %}
+
+{% block title %}Share your card — {{ config.SITE_NAME }}{% endblock %}
+
+{% block console %}
+<div class="console-head enter">
+  <div>
+    <h1>Share your card</h1>
+    <p>Three ways to hand it over: a link, a code, a tag.</p>
+  </div>
+</div>
+
+{% if not is_live %}
+  <div class="renewal renewal-late enter">
+    <div class="renewal-text">
+      <strong>This card is not live</strong>
+      <span>The link below will not open for anyone until the plan is active.</span>
+    </div>
+    <a class="btn btn-dark press" href="{{ url_for('billing.checkout') }}">Activate</a>
+  </div>
+{% endif %}
+
+<div class="share-grid">
+  <div class="panel enter enter-1">
+    <h3>Link</h3>
+    <div class="copy-field">
+      <input type="text" value="{{ card_url }}" readonly aria-label="Card link">
+      <button type="button" class="btn btn-dark press" data-copy="{{ card_url }}">Copy</button>
+    </div>
+    <p class="field-hint">Paste it in a WhatsApp bio, an email signature or a CV.</p>
+
+    <div class="share-buttons">
+      <button type="button" class="btn btn-ghost press"
+              data-share-url="{{ card_url }}"
+              data-share-title="{{ profile.full_name }}">Share via phone</button>
+      <a class="btn btn-ghost press"
+         href="https://wa.me/?text={{ card_url | urlencode }}" target="_blank" rel="noopener">Send on WhatsApp</a>
+      <a class="btn btn-ghost press" href="{{ vcf_url }}" download>Download the contact file</a>
+    </div>
+  </div>
+
+  <div class="panel qr-download enter enter-2">
+    <h3>QR code</h3>
+    {{ qr | safe }}
+    <a class="btn btn-dark btn-block press" href="{{ url_for('cards.qr_png', slug=profile.slug) }}" download>
+      Download PNG
+    </a>
+    <p class="field-hint">
+      Printed at 30 mm or larger it scans reliably. It is generated at the highest
+      error correction level, so a scratch or a smudge still reads.
+    </p>
+  </div>
+</div>
+
+<div class="panel enter enter-3">
+  <h3>NFC tag</h3>
+  <p class="text-small">
+    Write your card link to a blank NTAG215 tag with any NFC writer app, and stick
+    the tag on the back of your phone or on a desk plaque. A tap opens the card
+    with no camera, no app and no typing.
+  </p>
+  <div class="copy-field">
+    <input type="text" value="{{ card_url }}?s=nfc" readonly aria-label="Link for the NFC tag">
+    <button type="button" class="btn btn-ghost press" data-copy="{{ card_url }}?s=nfc">Copy</button>
+  </div>
+  <p class="field-hint">
+    The <code>?s=nfc</code> on the end is what separates tag taps from QR scans in
+    your analytics. It makes no difference to what the visitor sees.
+  </p>
+</div>
+{% endblock %}

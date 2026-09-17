@@ -1,0 +1,441 @@
+/* ==========================================================================
+   layout.css — page frame, header, footer, marketing sections
+   ========================================================================== */
+
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--content-width);
+  margin-inline: auto;
+  padding-inline: var(--s-5);
+}
+
+.wrap-narrow {
+  max-width: 34rem;
+}
+
+main {
+  flex: 1;
+}
+
+/* --- header -------------------------------------------------------------- */
+
+.site-head {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(250, 248, 244, 0.86);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.head-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-5);
+  min-height: 4.25rem;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  font-weight: 800;
+  font-size: var(--t-lead);
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+
+/* The mark is already a circle with its own ring, so it needs no frame,
+   no background and no border — anything added competes with the ring. */
+.brand-mark {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  transition: transform var(--medium) var(--ease-spring);
+}
+
+/* Rotation, not scale. The logo is radially symmetrical, so a spin reads as
+   deliberate where a bounce would look like a layout shift. */
+.brand:hover .brand-mark {
+  transform: rotate(12deg);
+}
+
+.brand-short {
+  display: none;
+}
+
+.foot-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.foot-mark {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.foot-identity strong {
+  display: block;
+  color: var(--ink);
+  font-weight: 700;
+  font-size: var(--t-small);
+}
+
+.foot-identity span {
+  display: block;
+  font-size: var(--t-micro);
+}
+
+.foot-contact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.foot-contact a {
+  color: var(--ash);
+  text-decoration: none;
+  font-size: var(--t-small);
+  transition: color var(--fast) var(--ease-out);
+}
+
+.foot-contact a:hover {
+  color: var(--blue);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.nav a:not(.btn) {
+  font-size: var(--t-small);
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--ash);
+  transition: color var(--fast) var(--ease-out);
+}
+
+.nav a:not(.btn):hover,
+.nav a:not(.btn)[aria-current="page"] {
+  color: var(--ink);
+}
+
+.nav-toggle {
+  display: none;
+}
+
+/* --- footer -------------------------------------------------------------- */
+
+.site-foot {
+  border-top: 1px solid var(--line);
+  padding: var(--s-7) 0 var(--s-6);
+  margin-top: var(--s-9);
+  color: var(--ash);
+  font-size: var(--t-small);
+}
+
+.foot-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.foot-links {
+  display: flex;
+  gap: var(--s-5);
+  flex-wrap: wrap;
+}
+
+.foot-links a:not(.btn) {
+  color: var(--ash);
+  text-decoration: none;
+}
+
+.foot-links a:hover {
+  color: var(--ink);
+}
+
+/* --- hero ---------------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  padding: var(--s-9) 0 var(--s-8);
+  overflow: hidden;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: var(--s-8);
+  align-items: center;
+}
+
+.hero-title {
+  font-size: var(--t-display);
+  font-weight: 800;
+  letter-spacing: var(--track-display);
+  margin-bottom: var(--s-5);
+  /* Montserrat 800 at display size runs long. Capping the measure keeps the
+     headline to two or three lines instead of one very wide band. */
+  max-width: 14ch;
+}
+
+.hero-lede {
+  font-size: var(--t-lead);
+  color: var(--ash);
+  max-width: 30rem;
+  margin-bottom: var(--s-6);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  margin-bottom: var(--s-6);
+}
+
+.hero-proof {
+  display: flex;
+  gap: var(--s-6);
+  flex-wrap: wrap;
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--line);
+}
+
+.proof-figure {
+  font-size: var(--t-h3);
+  font-weight: 700;
+  letter-spacing: var(--track-heading);
+  display: block;
+}
+
+.proof-label {
+  font-size: var(--t-micro);
+  color: var(--ash);
+}
+
+/* A soft gold bloom behind the hero card. Purely atmospheric, kept at very
+   low opacity so it never competes with the card itself. */
+.hero-glow {
+  position: absolute;
+  inset-block-start: -28%;
+  inset-inline-end: -10%;
+  width: 30rem;
+  height: 30rem;
+  /* Two stops, not three, and pulled apart. Three overlapping radials at
+     these alphas average out to a muddy grey rather than reading as brand
+     colour — the amber was contributing nothing but dirt. Each fades well
+     inside the element so the section's overflow clip cuts nothing visible. */
+  background:
+    radial-gradient(circle at 70% 30%, rgba(123, 25, 162, 0.11), transparent 45%),
+    radial-gradient(circle at 34% 64%, rgba(48, 112, 174, 0.13), transparent 47%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* --- generic sections ---------------------------------------------------- */
+
+.section {
+  padding-block: var(--s-8);
+}
+
+.section-head {
+  max-width: 40rem;
+  margin-bottom: var(--s-7);
+}
+
+.section-head p {
+  color: var(--ash);
+  font-size: var(--t-lead);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-5);
+  counter-reset: step;
+}
+
+.step {
+  padding: var(--s-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  box-shadow: var(--edge);
+}
+
+/* Numbered because this genuinely is a sequence: you cannot share before
+   you build, and you cannot build before you sign up. */
+.step::before {
+  counter-increment: step;
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--r-chip);
+  background: var(--purple-wash);
+  color: var(--purple-deep);
+  font-weight: 700;
+  font-size: var(--t-small);
+  margin-bottom: var(--s-4);
+}
+
+.step h3 {
+  font-size: var(--t-h4);
+}
+
+.step p {
+  color: var(--ash);
+  font-size: var(--t-small);
+  margin: 0;
+}
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-5);
+  align-items: start;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--s-7);
+  align-items: start;
+}
+
+/* --- dashboard frame ----------------------------------------------------- */
+
+.console {
+  display: grid;
+  /* 16rem, not 15rem: "Plan and payment" and "Who opened it" both need the
+     extra width in Montserrat before they wrap awkwardly mid-phrase. */
+  grid-template-columns: 16rem 1fr;
+  gap: var(--s-7);
+  padding-block: var(--s-7);
+  align-items: start;
+}
+
+.side-nav {
+  position: sticky;
+  top: 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.side-nav a:not(.btn) {
+  display: block;
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-control);
+  font-size: var(--t-small);
+  font-weight: 500;
+  color: var(--ash);
+  text-decoration: none;
+  transition:
+    background var(--fast) var(--ease-out),
+    color var(--fast) var(--ease-out),
+    transform var(--fast) var(--ease-out);
+}
+
+.side-nav a:hover {
+  background: var(--surface-sunk);
+  color: var(--ink);
+  transform: translateX(3px);
+}
+
+.side-nav a[aria-current="page"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.side-nav-group {
+  margin-top: var(--s-5);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+}
+
+/* --- responsive ---------------------------------------------------------- */
+
+@media (max-width: 62rem) {
+  .hero-grid,
+  .split {
+    grid-template-columns: 1fr;
+  }
+
+  .steps,
+  .plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .console {
+    grid-template-columns: 1fr;
+  }
+
+  .side-nav {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: var(--s-2);
+    padding-bottom: var(--s-2);
+  }
+
+  .side-nav a {
+    white-space: nowrap;
+  }
+
+  .side-nav-group {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    display: contents;
+  }
+}
+
+@media (max-width: 40rem) {
+  .wrap {
+    padding-inline: var(--s-4);
+  }
+
+  .hero {
+    padding-block: var(--s-7) var(--s-6);
+  }
+
+  .nav a:not(.btn) {
+    display: none;
+  }
+
+  /* "AD Smart Business Cards" in Montserrat 800 does not fit a 380px
+     header beside the mark and a button. */
+  .brand-full {
+    display: none;
+  }
+
+  .brand-short {
+    display: inline;
+  }
+
+  .foot-inner {
+    flex-direction: column;
+    gap: var(--s-5);
+  }
+
+  .hero-proof {
+    gap: var(--s-5);
+  }
+}

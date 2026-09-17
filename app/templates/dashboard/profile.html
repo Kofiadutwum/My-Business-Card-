@@ -1,0 +1,77 @@
+{% extends "dashboard/_shell.html" %}
+{% from "_macros.html" import field, checkbox, contact_card %}
+
+{% block title %}Card details — {{ config.SITE_NAME }}{% endblock %}
+
+{% block console %}
+<div class="console-head enter">
+  <div>
+    <h1>Card details</h1>
+    <p>The preview updates as you type.</p>
+  </div>
+</div>
+
+<div class="editor">
+  <form method="post" enctype="multipart/form-data" novalidate data-preview-form data-guard>
+    {{ form.hidden_tag() }}
+
+    <div class="panel enter enter-1">
+      <h3>Who you are</h3>
+      {{ field(form.full_name, placeholder="Ama Serwaa Boateng", autocomplete="name") }}
+      <div class="field-pair">
+        {{ field(form.job_title, placeholder="Procurement Lead") }}
+        {{ field(form.organisation, placeholder="Adinkra Logistics") }}
+      </div>
+
+      <div class="field {% if form.bio.errors %}field-error{% endif %}">
+        {{ form.bio.label }}
+        {{ form.bio(id="bio-field", placeholder="One line about what you do.") }}
+        {% for error in form.bio.errors %}<span class="error-text">{{ error }}</span>{% endfor %}
+        <span class="field-hint">
+          <output class="char-count" data-counter-for="bio-field" data-max="280">0 / 280</output>
+        </span>
+      </div>
+
+      {{ field(form.avatar, hint="Square photo works best. PNG, JPG or WebP, up to 3 MB.") }}
+    </div>
+
+    <div class="panel enter enter-2">
+      <h3>How people reach you</h3>
+      <div class="field-pair">
+        {{ field(form.phone, placeholder="0244123456", autocomplete="tel") }}
+        {{ field(form.whatsapp, placeholder="0244123456") }}
+      </div>
+      <div class="field-pair">
+        {{ field(form.email, placeholder="you@example.com", autocomplete="email") }}
+        {{ field(form.website, placeholder="https://example.com") }}
+      </div>
+      {{ field(form.location, placeholder="Cape Coast") }}
+    </div>
+
+    <div class="panel enter enter-3">
+      <h3>Your link and colour</h3>
+
+      <div class="field {% if form.slug.errors %}field-error{% endif %}">
+        {{ form.slug.label }}
+        <div class="slug-field">
+          <span class="slug-prefix">{{ config.SITE_URL|replace('https://', '')|replace('http://', '') }}/c/</span>
+          {{ form.slug(placeholder="ama-boateng") }}
+        </div>
+        {% for error in form.slug.errors %}<span class="error-text">{{ error }}</span>{% endfor %}
+        <span class="field-hint">
+          Changing this breaks any QR code already printed with the old link. Choose once, keep it.
+        </span>
+      </div>
+
+      {{ field(form.accent) }}
+      {{ checkbox(form.is_published) }}
+      {{ form.submit(class="btn btn-primary btn-large press", **{"data-busy-label": "Saving…"}) }}
+    </div>
+  </form>
+
+  <aside class="preview-column enter enter-2">
+    {{ contact_card(profile, vcf_url=None, interactive=true, preview=true) }}
+    <p class="preview-label">Live preview</p>
+  </aside>
+</div>
+{% endblock %}

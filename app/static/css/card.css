@@ -1,0 +1,434 @@
+/* ==========================================================================
+   card.css — the contact card itself, in preview and in public
+
+   This is where the boldness is spent. Everything else in the product is
+   deliberately quiet so that this object carries the identity.
+   ========================================================================== */
+
+.card-stage {
+  perspective: 1200px;
+  display: grid;
+  place-items: center;
+  padding: var(--s-5);
+}
+
+.contact-card {
+  position: relative;
+  width: min(23rem, 100%);
+  background: var(--surface);
+  border-radius: var(--r-card);
+  border: 1px solid var(--line);
+  box-shadow: var(--edge), var(--lift-2);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform var(--medium) var(--ease-out);
+}
+
+/* The accent band across the top: the visual equivalent of a card's printed
+   edge, and the one element that changes colour per subscriber. */
+.card-band {
+  height: 5.5rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  position: relative;
+}
+
+/* A thin amber rule under the band, echoing the gem facet in the logo. Two
+   pixels of the brand's third colour, on every card. */
+.card-band::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--amber);
+  z-index: 1;
+}
+
+.card-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 15% 0%,
+    rgba(255, 255, 255, 0.4),
+    transparent 58%
+  );
+}
+
+.card-body {
+  padding: 0 var(--s-5) var(--s-5);
+}
+
+.card-avatar {
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  border: 4px solid var(--surface);
+  background: var(--surface-sunk);
+  margin-top: -2.75rem;
+  position: relative;
+  z-index: 2;
+  object-fit: cover;
+  box-shadow: var(--lift-1);
+}
+
+.card-initials {
+  display: grid;
+  place-items: center;
+  font-size: var(--t-h3);
+  font-weight: 800;
+  color: var(--accent-deep);
+  background: var(--accent-wash);
+  /* Two wide capitals centred in a circle: the default sidebearing pushes
+     them right, so the pair is tightened and nudged back. */
+  letter-spacing: -0.04em;
+  text-indent: -0.04em;
+}
+
+.card-name {
+  font-size: var(--t-h3);
+  font-weight: 800;
+  letter-spacing: var(--track-heading);
+  margin: var(--s-4) 0 var(--s-1);
+  line-height: var(--leading-tight);
+}
+
+.card-role {
+  font-size: var(--t-small);
+  font-weight: 600;
+  color: var(--accent-deep);
+  margin: 0;
+}
+
+.card-org {
+  font-size: var(--t-small);
+  color: var(--ash);
+  margin: 0 0 var(--s-4);
+}
+
+.card-bio {
+  font-size: var(--t-small);
+  color: var(--ink-soft);
+  line-height: var(--leading-body);
+  margin-bottom: var(--s-5);
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.card-contacts {
+  list-style: none;
+  margin: 0 0 var(--s-5);
+  padding: 0;
+  display: grid;
+  gap: var(--s-1);
+}
+
+.card-contacts a {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  margin-inline: calc(var(--s-3) * -1);
+  border-radius: var(--r-control);
+  text-decoration: none;
+  font-size: var(--t-small);
+  transition: background var(--fast) var(--ease-out), transform var(--fast) var(--ease-out);
+}
+
+.card-contacts a:hover {
+  background: var(--accent-wash);
+  transform: translateX(3px);
+}
+
+.contact-icon {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: var(--r-control);
+  background: var(--surface-sunk);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: var(--t-micro);
+  font-weight: 700;
+  color: var(--ash);
+}
+
+.contact-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+  min-width: 0;
+}
+
+.contact-text span {
+  font-size: var(--t-micro);
+  color: var(--ash);
+}
+
+.contact-text strong {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Social chips: a wrapping grid rather than a list, because the count
+   varies from two to twenty-five across plans. */
+.card-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-bottom: var(--s-5);
+}
+
+.social-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 0.45rem 0.75rem;
+  letter-spacing: var(--track-micro);
+  border-radius: var(--r-chip);
+  background: var(--surface-sunk);
+  border: 1px solid transparent;
+  font-size: var(--t-micro);
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--ink-soft);
+  transition:
+    background var(--fast) var(--ease-out),
+    border-color var(--fast) var(--ease-out),
+    transform var(--fast) var(--ease-out);
+}
+
+.social-chip:hover {
+  background: var(--accent-wash);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.card-save {
+  display: block;
+}
+
+.card-foot {
+  margin-top: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+  text-align: center;
+  font-size: var(--t-micro);
+  color: var(--ash-light);
+}
+
+.card-foot a {
+  color: var(--ash);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* --- public page frame --------------------------------------------------- */
+
+.card-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--s-6) var(--s-4);
+  background:
+    radial-gradient(60rem 40rem at 50% -10%, var(--accent-wash), transparent 70%),
+    var(--paper);
+}
+
+.card-page-inner {
+  width: min(23rem, 100%);
+  display: grid;
+  gap: var(--s-5);
+}
+
+.qr-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: var(--s-5);
+  text-align: center;
+  box-shadow: var(--edge);
+}
+
+.qr-panel svg {
+  width: min(11rem, 60%);
+  height: auto;
+  margin-inline: auto;
+}
+
+.qr-panel p {
+  margin: var(--s-4) 0 0;
+  font-size: var(--t-micro);
+  color: var(--ash);
+  max-width: none;
+}
+
+/* --- lapsed card --------------------------------------------------------- */
+
+.lapsed {
+  max-width: 26rem;
+  text-align: center;
+  padding: var(--s-7) var(--s-5);
+}
+
+.lapsed-mark {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: var(--surface-sunk);
+  display: grid;
+  place-items: center;
+  margin: 0 auto var(--s-5);
+  font-size: var(--t-h3);
+  color: var(--ash);
+}
+
+.lapsed p {
+  margin-inline: auto;
+}
+
+/* --- live preview in the editor ------------------------------------------ */
+
+.preview-column {
+  position: sticky;
+  top: 6rem;
+}
+
+.preview-label {
+  font-size: var(--t-micro);
+  color: var(--ash);
+  text-align: center;
+  margin-top: var(--s-4);
+}
+
+/* Pointer tilt. JS sets --tilt-x / --tilt-y on the element; the transform
+   itself stays in CSS so the rule about separation holds. */
+.tiltable {
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+}
+
+@media (hover: none) {
+  .tiltable {
+    transform: none;
+  }
+}
+
+@media (max-width: 62rem) {
+  .preview-column {
+    position: static;
+  }
+}
+
+/* --- lead exchange -------------------------------------------------------
+   The reply form on the public card. Built on <details> so it opens with no
+   JavaScript and carries correct keyboard and screen-reader semantics for
+   free.
+   ------------------------------------------------------------------------ */
+
+.exchange {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  box-shadow: var(--edge);
+  overflow: hidden;
+}
+
+.exchange-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+  cursor: pointer;
+  font-size: var(--t-small);
+  font-weight: 600;
+  list-style: none;
+  transition: background var(--fast) var(--ease-out);
+}
+
+/* Safari renders its own disclosure triangle unless this is removed. */
+.exchange-summary::-webkit-details-marker {
+  display: none;
+}
+
+.exchange-summary:hover {
+  background: var(--accent-wash);
+}
+
+.exchange-chevron {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--accent-wash);
+  color: var(--accent-deep);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  line-height: 1;
+  transition: transform var(--medium) var(--ease-spring);
+}
+
+.exchange[open] .exchange-chevron {
+  transform: rotate(45deg);
+}
+
+.exchange-form {
+  padding: 0 var(--s-5) var(--s-5);
+  animation: rise var(--medium) var(--ease-out) both;
+}
+
+.exchange-form .field {
+  margin-bottom: var(--s-4);
+}
+
+.exchange-note {
+  margin: var(--s-3) 0 0;
+  font-size: var(--t-micro);
+  color: var(--ash);
+  text-align: center;
+  max-width: none;
+}
+
+/* Honeypot. Positioned out of view rather than display:none, because some
+   bots skip fields that are display:none but will happily fill this one.
+   aria-hidden and tabindex="-1" keep it away from real people. */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.flash-stack-inline {
+  display: grid;
+  gap: var(--s-3);
+}
+
+
+/* --- card credit ---------------------------------------------------------
+   The maker's mark at the foot of a public card. Deliberately quiet: the
+   card belongs to the subscriber, and this is a signature, not a banner.
+   ------------------------------------------------------------------------ */
+
+.card-credit {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  text-decoration: none;
+  color: var(--ash);
+  font-weight: 600;
+  opacity: 0.7;
+  transition: opacity var(--fast) var(--ease-out);
+}
+
+.card-credit:hover {
+  opacity: 1;
+}
+
+.card-credit img {
+  width: 1.1rem;
+  height: 1.1rem;
+}

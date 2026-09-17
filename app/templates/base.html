@@ -1,0 +1,110 @@
+{# Base layout. Every stylesheet is linked here; no page carries its own CSS. #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ config.SITE_NAME }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}Build one contact card, share it with a link or a QR code, and let people save your details in a tap.{% endblock %}">
+  <meta name="theme-color" content="#3070ae">
+
+  <link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='img/favicon.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}">
+  {% block stylesheets %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  {% if current_user.is_authenticated and current_user.is_admin %}
+    <div class="admin-bar">
+      <div class="wrap admin-bar-inner">
+        <span>Signed in as <strong>{{ current_user.email }}</strong> — administrator</span>
+        <a href="{{ url_for('admin.dashboard') }}">Admin console</a>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="shell">
+    <header class="site-head">
+      <div class="wrap head-inner">
+        <a class="brand" href="{{ url_for('main.index') }}">
+          <img class="brand-mark"
+               src="{{ url_for('static', filename='img/logo-small.png') }}"
+               alt="" width="96" height="96" decoding="async">
+          {# Full name on desktop, short form on a phone. "AD Smart Business
+             Cards" set in Montserrat is too wide for a 380px header. #}
+          <span class="brand-full">{{ config.SITE_NAME }}</span>
+          <span class="brand-short">{{ config.SITE_SHORT_NAME }}</span>
+        </a>
+
+        <nav class="nav" aria-label="Main">
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+            <a href="{{ url_for('dashboard.share') }}">Share</a>
+            <a href="{{ url_for('billing.checkout') }}">Plan</a>
+            <a class="btn btn-ghost btn-small" href="{{ url_for('auth.logout') }}">Sign out</a>
+          {% else %}
+            <a href="{{ url_for('main.pricing') }}">Pricing</a>
+            <a href="{{ url_for('auth.login') }}">Sign in</a>
+            <a class="btn btn-primary btn-small press" href="{{ url_for('auth.register') }}">Get a card</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack" role="status" aria-live="polite">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }} toast">
+              <p>{{ message }}</p>
+              <button type="button" class="flash-close" aria-label="Dismiss">&times;</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <main id="main">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-foot">
+      <div class="wrap foot-inner">
+        <div class="foot-identity">
+          <img class="foot-mark"
+               src="{{ url_for('static', filename='img/logo-small.png') }}"
+               alt="" width="96" height="96" loading="lazy" decoding="async">
+          <div>
+            <strong>{{ config.SITE_NAME }}</strong>
+            <span>&copy; {{ now_year }}. Built in Ghana.</span>
+          </div>
+        </div>
+
+        <div class="foot-contact">
+          <a href="mailto:{{ config.SUPPORT_EMAIL }}">{{ config.SUPPORT_EMAIL }}</a>
+          <a href="tel:+233{{ config.SUPPORT_PHONE[1:] }}">{{ config.SUPPORT_PHONE }}</a>
+          <a href="https://wa.me/233{{ config.SUPPORT_PHONE[1:] }}" rel="noopener">WhatsApp</a>
+        </div>
+
+        <div class="foot-links">
+          <a href="{{ url_for('main.pricing') }}">Pricing</a>
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

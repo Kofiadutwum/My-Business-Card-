@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}That file is too large — {{ config.SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="wrap wrap-narrow">
+    <div class="panel enter">
+      <h1>That file is too large</h1>
+      <p class="muted">Profile photos are capped at 3 MB. Try a smaller image, or reduce the resolution before uploading.</p>
+      <a class="btn btn-primary press" href="{{ url_for('main.index') }}">Back to the start</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

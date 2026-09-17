@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}This card is gone — {{ config.SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="wrap wrap-narrow">
+    <div class="panel enter">
+      <h1>This card is gone</h1>
+      <p class="muted">The link worked once, but the card behind it is no longer published.</p>
+      <a class="btn btn-primary press" href="{{ url_for('main.index') }}">Back to the start</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

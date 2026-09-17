@@ -1,0 +1,111 @@
+{% extends "dashboard/_shell.html" %}
+{% from "_macros.html" import bar_chart, status_badge %}
+
+{% block title %}Dashboard — {{ config.SITE_NAME }}{% endblock %}
+
+{% block console %}
+<div class="console-head enter">
+  <div>
+    <h1>Your card</h1>
+    <p>{{ profile.full_name }}{% if profile.job_title %} — {{ profile.job_title }}{% endif %}</p>
+  </div>
+  <div class="row">
+    {% if profile.is_live %}
+      <a class="btn btn-ghost btn-small press" href="{{ url_for('cards.show', slug=profile.slug) }}" target="_blank">View live card</a>
+    {% endif %}
+    <a class="btn btn-primary btn-small press" href="{{ url_for('dashboard.edit_profile') }}">Edit details</a>
+  </div>
+</div>
+
+{# --- renewal state -----------------------------------------------------
+   The single most important thing on this page. A subscriber who does not
+   know their card is about to go dark will find out from a customer, which
+   is the worst possible way to learn it.
+   ---------------------------------------------------------------------- #}
+{% if not subscription %}
+  <div class="renewal renewal-late enter enter-1">
+    <div class="renewal-text">
+      <strong>Your card is not published yet</strong>
+      <span>Choose a plan to put it online at your link.</span>
+    </div>
+    <a class="btn btn-dark press" href="{{ url_for('billing.checkout') }}">Choose a plan</a>
+  </div>
+{% elif subscription.status == 'expired' %}
+  <div class="renewal renewal-late enter enter-1">
+    <div class="renewal-text">
+      <strong>This card has gone dark</strong>
+      <span>It expired on {{ subscription.expires_at | day }}. Your details are safe — renewing brings the same link straight back.</span>
+    </div>
+    <a class="btn btn-dark press" href="{{ url_for('billing.checkout') }}">Renew now</a>
+  </div>
+{% elif subscription.status == 'grace' %}
+  <div class="renewal renewal-soon enter enter-1">
+    <div class="renewal-text">
+      <strong>Grace period — {{ config.GRACE_PERIOD_DAYS }} days</strong>
+      <span>The plan expired on {{ subscription.expires_at | day }}. The card is still live for now.</span>
+    </div>
+    <a class="btn btn-dark press" href="{{ url_for('billing.checkout') }}">Renew</a>
+  </div>
+{% elif days_left is not none and days_left <= notice_days %}
+  <div class="renewal renewal-soon enter enter-1">
+    <div class="renewal-text">
+      <strong>{{ days_left }} days left on your plan</strong>
+      <span>Renews from {{ subscription.expires_at | day }}. Paying early adds a year to that date — you lose nothing.</span>
+      <progress class="renewal-meter" max="{{ notice_days }}" value="{{ days_left }}"></progress>
+    </div>
+    <a class="btn btn-dark press" href="{{ url_for('billing.checkout') }}">Renew early</a>
+  </div>
+{% else %}
+  <div class="renewal renewal-ok enter enter-1">
+    <div class="renewal-text">
+      <strong>{{ config.PLANS[subscription.plan].label }} plan, active</strong>
+      <span>Your card stays live until {{ subscription.expires_at | day }}.</span>
+    </div>
+    {{ status_badge(subscription.status) }}
+  </div>
+{% endif %}
+
+<div class="stat-row enter enter-2">
+  <div class="stat stat-accent">
+    <span class="stat-value">{{ views_30 }}</span>
+    <span class="stat-label">Card opened, last 30 days</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ saves_30 }}</span>
+    <span class="stat-label">Saved to contacts</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ profile.social_links|length }}</span>
+    <span class="stat-label">Social links</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ 'Live' if profile.is_live else 'Dark' }}</span>
+    <span class="stat-label">Card status</span>
+  </div>
+</div>
+
+<div class="panel enter enter-3">
+  <div class="panel-head">
+    <div>
+      <h2>Activity</h2>
+      <p>Every opening of your card over the last thirty days.</p>
+    </div>
+    <a class="btn btn-ghost btn-small press" href="{{ url_for('dashboard.analytics') }}">Full breakdown</a>
+  </div>
+  {{ bar_chart(series, series_max, height=140, caption=None) }}
+</div>
+
+<div class="panel enter enter-4">
+  <div class="panel-head">
+    <h3>Your link</h3>
+  </div>
+  <div class="copy-field">
+    <input type="text" value="{{ card_url }}" readonly aria-label="Your card link">
+    <button type="button" class="btn btn-dark press" data-copy="{{ card_url }}">Copy</button>
+  </div>
+  <p class="field-hint">
+    This link never changes, even when you edit the card. Print the QR code on a
+    badge or a shopfront sticker and it keeps working.
+  </p>
+</div>
+{% endblock %}

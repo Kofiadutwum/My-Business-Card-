@@ -1,0 +1,122 @@
+{% extends "admin/_shell.html" %}
+{% from "_macros.html" import bar_chart, money_chart, share_bars, status_badge %}
+
+{% block title %}Admin overview — {{ config.SITE_NAME }}{% endblock %}
+
+{% block console %}
+<div class="console-head enter">
+  <div>
+    <h1>Overview</h1>
+    <p>Clients, subscriptions and money, as at today.</p>
+  </div>
+</div>
+
+<div class="stat-row enter enter-1">
+  <div class="stat stat-accent">
+    <span class="stat-value">{{ total_users }}</span>
+    <span class="stat-label">Registered clients</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ active_count }}</span>
+    <span class="stat-label">Active subscriptions</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ retention }}%</span>
+    <span class="stat-label">Share of clients paying</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value money-figure">{{ net | money }}</span>
+    <span class="stat-label">Collected, net of fees</span>
+  </div>
+</div>
+
+<div class="admin-grid enter enter-2">
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Revenue by month</h2>
+        <p>Cash collected, not revenue earned. The finance page separates the two.</p>
+      </div>
+      <a class="btn btn-ghost btn-small press" href="{{ url_for('admin.finance') }}">Finance detail</a>
+    </div>
+    {{ money_chart(revenue_series, revenue_max, currency=currency) }}
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h3>Subscription states</h3>
+    </div>
+    <ul class="share-list">
+      <li class="share-row">
+        <span>Active</span>
+        <progress max="{{ total_users or 1 }}" value="{{ active_count }}"></progress>
+        <strong>{{ active_count }}</strong>
+      </li>
+      <li class="share-row">
+        <span>In grace</span>
+        <progress max="{{ total_users or 1 }}" value="{{ grace_count }}"></progress>
+        <strong>{{ grace_count }}</strong>
+      </li>
+      <li class="share-row">
+        <span>Expired</span>
+        <progress max="{{ total_users or 1 }}" value="{{ expired_count }}"></progress>
+        <strong>{{ expired_count }}</strong>
+      </li>
+    </ul>
+
+    <hr>
+    <h3>Plan mix</h3>
+    {{ share_bars(plan_split, active_count or 1, labels={'starter': 'Starter', 'professional': 'Professional', 'business': 'Business'}) }}
+  </div>
+</div>
+
+<div class="admin-grid enter enter-3">
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h3>Signups, last 30 days</h3>
+        <p>New accounts per day.</p>
+      </div>
+    </div>
+    {{ bar_chart(signup_series, signup_max, height=120) }}
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h3>Where the money comes in</h3>
+        <p>By value, not by count.</p>
+      </div>
+    </div>
+    {{ share_bars(channel_split, channel_total, labels={'mtn': 'MTN MoMo', 'vod': 'Telecel Cash', 'atl': 'AirtelTigo Money', 'card': 'Card'}, money=true, currency=currency) }}
+    <p class="finance-note">
+      If mobile money carries most of this, a broken MoMo flow is a business
+      outage rather than an edge case. Test that path first after any change.
+    </p>
+  </div>
+</div>
+
+<div class="panel enter enter-4">
+  <div class="panel-head">
+    <div>
+      <h3>Expiring within {{ config.RENEWAL_NOTICE_DAYS }} days</h3>
+      <p>The renewal chase list. Reach these clients before the card goes dark, not after.</p>
+    </div>
+  </div>
+
+  {% if expiring_soon %}
+    <ul class="chase-list">
+      {% for sub in expiring_soon %}
+        <li class="chase-row">
+          <strong>{{ sub.user.email }}</strong>
+          <span class="muted text-micro">{{ config.PLANS[sub.plan].label if sub.plan in config.PLANS else sub.plan }}</span>
+          <span>{{ sub.expires_at | day }}</span>
+          <a class="btn btn-ghost btn-small press" href="{{ url_for('admin.client_detail', user_id=sub.user_id) }}">Open</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted text-small">Nothing expiring in that window.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "dashboard/_shell.html" %}
+{% from "_macros.html" import share_bars %}
+
+{% block title %}Contacts received — {{ config.SITE_NAME }}{% endblock %}
+
+{% block console %}
+<div class="console-head enter">
+  <div>
+    <h1>Contacts received</h1>
+    <p>People who sent their details back through your card.</p>
+  </div>
+  {% if leads %}
+    <a class="btn btn-ghost btn-small press" href="{{ url_for('dashboard.export_leads') }}">
+      Download CSV
+    </a>
+  {% endif %}
+</div>
+
+{% if leads %}
+  <div class="stat-row enter enter-1">
+    <div class="stat stat-accent">
+      <span class="stat-value">{{ total }}</span>
+      <span class="stat-label">Contacts in total</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ recent_count }}</span>
+      <span class="stat-label">In the last 30 days</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ unread_count }}</span>
+      <span class="stat-label">New since you last looked</span>
+    </div>
+  </div>
+
+  <div class="panel enter enter-2">
+    <div class="panel-head">
+      <div>
+        <h3>How they reached you</h3>
+        <p>Whether these came from a scan, a tap or a shared link.</p>
+      </div>
+    </div>
+    {{ share_bars(by_source, total, labels={'link': 'Shared link', 'qr': 'QR scan', 'nfc': 'NFC tap'}) }}
+  </div>
+
+  <ul class="lead-list enter enter-3">
+    {% for lead in leads %}
+      <li class="lead-card {% if not lead.is_read %}lead-new{% endif %}">
+        <div class="lead-head">
+          <div>
+            <strong class="lead-name">{{ lead.name }}</strong>
+            {% if lead.organisation %}
+              <span class="lead-org">{{ lead.organisation }}</span>
+            {% endif %}
+          </div>
+          <span class="lead-date">{{ lead.created_at | day }}</span>
+        </div>
+
+        <div class="lead-contacts">
+          {% if lead.phone %}
+            <a class="lead-action" href="tel:{{ lead.phone }}">{{ lead.phone }}</a>
+            <a class="lead-action" href="https://wa.me/{{ lead.phone|replace('+', '') }}"
+               target="_blank" rel="noopener">WhatsApp</a>
+          {% endif %}
+          {% if lead.email %}
+            <a class="lead-action" href="mailto:{{ lead.email }}">{{ lead.email }}</a>
+          {% endif %}
+        </div>
+
+        {% if lead.note %}
+          <p class="lead-note">{{ lead.note }}</p>
+        {% endif %}
+
+        <div class="lead-foot">
+          <span class="badge badge-neutral">
+            {% if lead.source == 'qr' %}QR scan
+            {% elif lead.source == 'nfc' %}NFC tap
+            {% else %}Shared link{% endif %}
+          </span>
+          <form method="post" action="{{ url_for('dashboard.delete_lead', lead_id=lead.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger btn-small press">Remove</button>
+          </form>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="empty enter enter-1">
+    <h3>No contacts yet</h3>
+    <p>
+      When someone opens your card they can send their own name and number
+      straight back to you. Those replies land here, and you get a text the
+      moment one arrives.
+    </p>
+    <a class="btn btn-primary press" href="{{ url_for('dashboard.share') }}">Share your card</a>
+  </div>
+{% endif %}
+{% endblock %}

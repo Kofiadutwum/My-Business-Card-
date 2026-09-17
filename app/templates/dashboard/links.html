@@ -1,0 +1,57 @@
+{% extends "dashboard/_shell.html" %}
+{% from "_macros.html" import field %}
+
+{% block title %}Social links — {{ config.SITE_NAME }}{% endblock %}
+
+{% block console %}
+<div class="console-head enter">
+  <div>
+    <h1>Social links</h1>
+    <p>These appear as chips at the bottom of your card.</p>
+  </div>
+</div>
+
+<div class="panel enter enter-1">
+  <div class="quota">
+    <span>{{ used }} of {{ limit }} used on your plan</span>
+    <progress max="{{ limit }}" value="{{ used }}"></progress>
+    {% if used >= limit %}
+      <a href="{{ url_for('billing.checkout') }}">Upgrade for more</a>
+    {% endif %}
+  </div>
+
+  {% if profile.social_links %}
+    <ul class="link-list">
+      {% for link in profile.social_links %}
+        <li class="link-row">
+          <div class="link-row-main">
+            <strong>{{ link.label }}</strong>
+            <span>{{ link.url }}</span>
+          </div>
+          <form method="post" action="{{ url_for('dashboard.delete_link', link_id=link.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger btn-small press">Remove</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty">
+      <h3>No links yet</h3>
+      <p>Add the places you want people to find you — LinkedIn, Instagram, a portfolio, your ORCID record.</p>
+    </div>
+  {% endif %}
+</div>
+
+<div class="panel enter enter-2">
+  <h3>Add a link</h3>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="field-pair">
+      {{ field(form.platform) }}
+      {{ field(form.url, placeholder="https://linkedin.com/in/yourname") }}
+    </div>
+    {{ form.submit(class="btn btn-primary press") }}
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{#
+  Served with HTTP 410 Gone. The card existed and may return, and 410 tells
+  search engines exactly that — unlike a 404, which claims it never existed.
+#}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>This card is not active</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}">
+</head>
+<body>
+  <main class="card-page">
+    <div class="panel lapsed enter">
+      <div class="lapsed-mark" aria-hidden="true">—</div>
+      <h1>This card is not active</h1>
+      <p class="muted">
+        The link is correct, but the card behind it is not published at the
+        moment. If you were given this by someone recently, ask them to check it.
+      </p>
+      <a class="btn btn-ghost press" href="{{ url_for('main.index') }}">What is this?</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, checkbox %}
+
+{% block title %}Sign in — {{ config.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="wrap wrap-narrow">
+    <div class="panel enter">
+      <h1>Sign in</h1>
+      <p class="muted text-small">Reach your card, your links and your plan.</p>
+
+      <form method="post" novalidate data-guard>
+        {{ form.hidden_tag() }}
+        {{ field(form.email, placeholder="you@example.com", autocomplete="email") }}
+        {{ field(form.password, autocomplete="current-password") }}
+        {{ checkbox(form.remember) }}
+        {{ form.submit(class="btn btn-primary btn-block btn-large press", **{"data-busy-label": "Signing in…"}) }}
+      </form>
+
+      <hr>
+      <p class="text-small muted">
+        No account yet? <a href="{{ url_for('auth.register') }}">Build a card</a>.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

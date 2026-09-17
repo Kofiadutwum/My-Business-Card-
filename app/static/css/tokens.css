@@ -1,0 +1,184 @@
+/* ==========================================================================
+   tokens.css — the single source of visual truth
+
+   Every colour, space and radius used anywhere in this project is declared
+   here. If a hex value appears in another stylesheet, that is a bug.
+   ========================================================================== */
+
+:root {
+  /* --- colour ----------------------------------------------------------
+     Sampled directly from the AD Smart Business Cards logo, not guessed:
+
+       #3070ae  the ring and the 'd'      -> primary
+       #7b19a2  the 'a' and the gemstone  -> secondary
+       #e5af42  the gem facet and the tittle -> highlight
+       #5b616d  the backdrop grey         -> muted text
+
+     The greys below are pulled cool to sit with the blue. A warm grey next
+     to this blue reads as dirty rather than neutral.
+     -------------------------------------------------------------------- */
+  --ink: #1e232b;
+  --ink-soft: #3a4049;
+  --paper: #f6f7f9;
+  --surface: #ffffff;
+  --surface-sunk: #edeff3;
+
+  /* Primary: the blue ring */
+  --blue: #3070ae;
+  --blue-deep: #24568a;
+  --blue-wash: #e7eff7;
+
+  /* Secondary: the purple letterform */
+  --purple: #7b19a2;
+  --purple-deep: #5d1279;
+  --purple-wash: #f3e7f8;
+
+  /* Highlight: the gem facet. Used sparingly — it is the smallest colour in
+     the logo and it should stay the smallest colour on the page. */
+  --amber: #e5af42;
+  --amber-deep: #a97d1e;
+  --amber-wash: #fcf4e2;
+
+  --ash: #5b616d;
+  --ash-light: #8d939e;
+  --line: #dfe3e9;
+  --line-strong: #c4cad4;
+
+  /* Semantic states stay conventional. Green for live, red for lapsed: a
+     subscriber glancing at a status badge should not have to learn a
+     bespoke colour language to read it. */
+  --jade: #0e7a63;
+  --jade-wash: #e2f1ed;
+  --ember: #b3341f;
+  --ember-wash: #f8e6e2;
+
+  /* Accent slots. The public card re-points these per subscriber choice,
+     so one stylesheet serves four card colourways. */
+  --accent: var(--blue);
+  --accent-deep: var(--blue-deep);
+  --accent-wash: var(--blue-wash);
+  --accent-on: #ffffff;
+
+  /* --- type ------------------------------------------------------------ */
+  --font: "Montserrat", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+  /* A modular scale at 1.25. Sizes are named by role, not by size, so
+     changing the scale never means renaming variables.
+
+     These sizes are tuned for Montserrat specifically. Montserrat is a wide
+     geometric face: set at the sizes a narrower sans would take, headlines
+     overflow their column and the hero wraps badly on a phone. The display
+     and h1 ceilings are therefore lower than the scale alone would suggest.
+     Swapping to a narrower family means raising them again. */
+  --t-micro: 0.75rem;
+  --t-small: 0.875rem;
+  --t-body: 1rem;
+  --t-lead: 1.125rem;
+  --t-h4: 1.2rem;
+  --t-h3: 1.4rem;
+  --t-h2: 1.85rem;
+  --t-h1: clamp(2rem, 5.2vw, 3.1rem);
+  --t-display: clamp(2.35rem, 7.5vw, 4.25rem);
+
+  /* Montserrat has an unusually large x-height (525/1000 against a cap
+     height of 700). Large x-heights read as crowded unless the leading is
+     opened up, so body text sits a little looser than a default sans would. */
+  --leading-tight: 1.12;
+  --leading-snug: 1.35;
+  --leading-body: 1.7;
+
+  /* Tracking. Geometric faces set loose at large sizes and tight at small
+     ones, so the correction runs in opposite directions at each end. */
+  --track-display: -0.035em;
+  --track-heading: -0.02em;
+  --track-body: 0;
+  --track-micro: 0.01em;
+
+  /* --- space ----------------------------------------------------------- */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+
+  /* --- shape ----------------------------------------------------------- */
+  /* Deliberately not one radius everywhere: a card, a button and a chip are
+     different objects and should not share a corner. */
+  --r-chip: 999px;
+  --r-control: 10px;
+  --r-panel: 14px;
+  --r-card: 22px;
+
+  --edge: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --lift-1: 0 1px 2px rgba(20, 22, 26, 0.06), 0 6px 16px -8px rgba(20, 22, 26, 0.14);
+  --lift-2: 0 2px 4px rgba(20, 22, 26, 0.06), 0 18px 40px -16px rgba(20, 22, 26, 0.22);
+  --lift-accent: 0 18px 44px -20px rgba(48, 112, 174, 0.55);
+  --lift-purple: 0 18px 44px -20px rgba(123, 25, 162, 0.45);
+
+  --content-width: 68rem;
+  --prose-width: 36rem;
+
+  /* --- motion ---------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.22, 0.85, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+  --fast: 140ms;
+  --medium: 320ms;
+  --slow: 620ms;
+}
+
+/* Card colourways, drawn from the logo. A subscriber picking a colour is
+   picking one of the brand's own three, not an arbitrary swatch. */
+.accent-blue {
+  --accent: var(--blue);
+  --accent-deep: var(--blue-deep);
+  --accent-wash: var(--blue-wash);
+  --accent-on: #ffffff;
+}
+
+.accent-purple {
+  --accent: var(--purple);
+  --accent-deep: var(--purple-deep);
+  --accent-wash: var(--purple-wash);
+  --accent-on: #ffffff;
+}
+
+.accent-amber {
+  --accent: var(--amber);
+  --accent-deep: var(--amber-deep);
+  --accent-wash: var(--amber-wash);
+  --accent-on: var(--ink);
+}
+
+.accent-ink {
+  --accent: var(--ink);
+  --accent-deep: #000000;
+  --accent-wash: #e9ebef;
+  --accent-on: #ffffff;
+}
+
+/* Kept so that cards saved under the previous palette still render rather
+   than falling back to an unstyled band. Remove once the data is migrated. */
+.accent-gold {
+  --accent: var(--amber);
+  --accent-deep: var(--amber-deep);
+  --accent-wash: var(--amber-wash);
+  --accent-on: var(--ink);
+}
+
+.accent-jade {
+  --accent: var(--jade);
+  --accent-deep: #0a5b4a;
+  --accent-wash: var(--jade-wash);
+  --accent-on: #ffffff;
+}
+
+.accent-clay {
+  --accent: var(--ember);
+  --accent-deep: #8c2717;
+  --accent-wash: var(--ember-wash);
+  --accent-on: #ffffff;
+}

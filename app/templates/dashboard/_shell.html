@@ -1,0 +1,37 @@
+{# Shared frame for every subscriber page. #}
+{% extends "base.html" %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="wrap console">
+  <nav class="side-nav" aria-label="Dashboard">
+    <a href="{{ url_for('dashboard.index') }}"
+       {% if request.endpoint == 'dashboard.index' %}aria-current="page"{% endif %}>Overview</a>
+    <a href="{{ url_for('dashboard.edit_profile') }}"
+       {% if request.endpoint == 'dashboard.edit_profile' %}aria-current="page"{% endif %}>Card details</a>
+    <a href="{{ url_for('dashboard.links') }}"
+       {% if request.endpoint == 'dashboard.links' %}aria-current="page"{% endif %}>Social links</a>
+    <a href="{{ url_for('dashboard.share') }}"
+       {% if request.endpoint == 'dashboard.share' %}aria-current="page"{% endif %}>Share</a>
+    <a href="{{ url_for('dashboard.analytics') }}"
+       {% if request.endpoint == 'dashboard.analytics' %}aria-current="page"{% endif %}>Who opened it</a>
+    <a href="{{ url_for('dashboard.leads') }}"
+       {% if request.endpoint == 'dashboard.leads' %}aria-current="page"{% endif %}>Contacts received</a>
+
+    <div class="side-nav-group">
+      <a href="{{ url_for('billing.checkout') }}"
+         {% if request.endpoint == 'billing.checkout' %}aria-current="page"{% endif %}>Plan and payment</a>
+      <a href="{{ url_for('billing.receipts') }}"
+         {% if request.endpoint == 'billing.receipts' %}aria-current="page"{% endif %}>Receipts</a>
+      <a href="{{ url_for('auth.change_password') }}">Password</a>
+    </div>
+  </nav>
+
+  <div>
+    {% block console %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "dashboard/_shell.html" %}
+{% from "_macros.html" import bar_chart, share_bars %}
+
+{% block title %}Who opened your card — {{ config.SITE_NAME }}{% endblock %}
+
+{% block console %}
+<div class="console-head enter">
+  <div>
+    <h1>Who opened your card</h1>
+    <p>Last ninety days.</p>
+  </div>
+</div>
+
+<div class="stat-row enter enter-1">
+  <div class="stat stat-accent">
+    <span class="stat-value">{{ total }}</span>
+    <span class="stat-label">Times opened</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ unique }}</span>
+    <span class="stat-label">Separate devices</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ saves }}</span>
+    <span class="stat-label">Saved to contacts</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ ((saves / total * 100) | round(0) | int) if total else 0 }}%</span>
+    <span class="stat-label">Save rate</span>
+  </div>
+</div>
+
+<div class="panel enter enter-2">
+  <div class="panel-head">
+    <div>
+      <h2>Openings by day</h2>
+      <p>Hover a bar for the date and count.</p>
+    </div>
+  </div>
+  {{ bar_chart(series, series_max, height=160) }}
+</div>
+
+<div class="panel enter enter-3">
+  <div class="panel-head">
+    <div>
+      <h3>How they arrived</h3>
+      <p>Whether people are scanning, tapping or following a link tells you which one to keep investing in.</p>
+    </div>
+  </div>
+  {{ share_bars(by_source, total or 1, labels={'link': 'Shared link', 'qr': 'QR scan', 'nfc': 'NFC tap'}) }}
+</div>
+
+<div class="panel enter enter-4">
+  <h3>What is and is not recorded</h3>
+  <p class="text-small muted">
+    Each opening records the date, how the visitor arrived, and a one-way
+    fingerprint used only to tell a repeat visit from a new one. No names, no
+    phone numbers, and no stored IP addresses — under Ghana's Data Protection
+    Act an IP address is personal data, so it is hashed on arrival and the
+    original is never written down.
+  </p>
+</div>
+{% endblock %}

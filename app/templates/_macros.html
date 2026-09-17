@@ -1,0 +1,232 @@
+{#
+  Reusable fragments.
+
+  The chart macros deserve a word. Every bar height and line point is written
+  as an SVG geometry attribute (x, y, width, height, points) rather than as a
+  CSS style attribute. SVG geometry attributes are part of the SVG language,
+  not CSS, so the charts stay fully data-driven while the rule that no styling
+  lives in the markup holds absolutely.
+#}
+
+{# --- form field ---------------------------------------------------------- #}
+{% macro field(f, hint=None, placeholder=None, autocomplete=None) %}
+  <div class="field {% if f.errors %}field-error{% endif %}">
+    {{ f.label }}
+    {{ f(placeholder=placeholder, autocomplete=autocomplete) }}
+    {% for error in f.errors %}
+      <span class="error-text">{{ error }}</span>
+    {% endfor %}
+    {% if hint %}<span class="field-hint">{{ hint }}</span>{% endif %}
+  </div>
+{% endmacro %}
+
+{% macro checkbox(f) %}
+  <div class="check-row {% if f.errors %}field-error{% endif %}">
+    {{ f() }}
+    {{ f.label }}
+  </div>
+  {% for error in f.errors %}
+    <span class="error-text">{{ error }}</span>
+  {% endfor %}
+{% endmacro %}
+
+{# --- status badge -------------------------------------------------------- #}
+{% macro status_badge(status) %}
+  {% set map = {
+    'active':    ('badge-active',  'Active'),
+    'grace':     ('badge-grace',   'In grace period'),
+    'expired':   ('badge-expired', 'Expired'),
+    'cancelled': ('badge-neutral', 'Cancelled'),
+    'none':      ('badge-neutral', 'No plan'),
+    'success':   ('badge-active',  'Paid'),
+    'pending':   ('badge-grace',   'Pending'),
+    'failed':    ('badge-expired', 'Failed'),
+    'abandoned': ('badge-neutral', 'Abandoned')
+  } %}
+  {% set klass, label = map.get(status, ('badge-neutral', status|title)) %}
+  <span class="badge {{ klass }}"><span class="badge-dot" aria-hidden="true"></span>{{ label }}</span>
+{% endmacro %}
+
+{# --- bar chart -----------------------------------------------------------
+     series: an ordered mapping of label -> value
+     Renders a dense series, so zero days show as gaps rather than silently
+     closing up and overstating activity.
+   ------------------------------------------------------------------------ #}
+{% macro bar_chart(series, peak, height=140, caption=None, unit='') %}
+  {% if series and peak > 0 %}
+    {% set count = series|length %}
+    {% set gap = 2 %}
+    {% set bar_w = ((600 - (count - 1) * gap) / count) %}
+    <svg class="chart" viewBox="0 0 600 {{ height }}" role="img"
+         aria-label="{{ caption or 'Activity over time' }}" preserveAspectRatio="none">
+      <line class="chart-grid" x1="0" y1="{{ height / 2 }}" x2="600" y2="{{ height / 2 }}"></line>
+      <line class="chart-grid" x1="0" y1="{{ height - 1 }}" x2="600" y2="{{ height - 1 }}"></line>
+      {% for label, value in series.items() %}
+        {% set bar_h = (value / peak * (height - 8)) if peak else 0 %}
+        <rect class="chart-bar {% if value == 0 %}chart-bar-muted{% endif %}"
+              x="{{ loop.index0 * (bar_w + gap) }}"
+              y="{{ height - bar_h }}"
+              width="{{ bar_w }}"
+              height="{{ bar_h if bar_h > 1 else 1 }}"
+              rx="1">
+          <title>{{ label }}: {{ value }}{{ unit }}</title>
+        </rect>
+      {% endfor %}
+    </svg>
+    {% if caption %}<p class="chart-caption">{{ caption }}</p>{% endif %}
+  {% else %}
+    <div class="chart-empty">
+      <span>Nothing to chart yet. Data appears here once your card is opened.</span>
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{# --- revenue column chart, with money labels ----------------------------- #}
+{% macro money_chart(series, peak, currency='GHS', height=180) %}
+  {% if series and peak > 0 %}
+    {% set count = series|length %}
+    {% set slot = 600 / count %}
+    {% set bar_w = slot * 0.55 %}
+    <svg class="chart" viewBox="0 0 600 {{ height }}" role="img" aria-label="Revenue by month">
+      <line class="chart-grid" x1="0" y1="{{ height - 22 }}" x2="600" y2="{{ height - 22 }}"></line>
+      {% for label, value in series.items() %}
+        {% set bar_h = value / peak * (height - 50) %}
+        <rect class="chart-bar"
+              x="{{ loop.index0 * slot + (slot - bar_w) / 2 }}"
+              y="{{ height - 22 - bar_h }}"
+              width="{{ bar_w }}"
+              height="{{ bar_h if bar_h > 1 else 1 }}"
+              rx="3">
+          <title>{{ label | month_name }}: {{ currency }} {{ '%.2f'|format(value / 100) }}</title>
+        </rect>
+        <text class="chart-axis" text-anchor="middle"
+              x="{{ loop.index0 * slot + slot / 2 }}"
+              y="{{ height - 7 }}">{{ label | month_name }}</text>
+      {% endfor %}
+    </svg>
+  {% else %}
+    <div class="chart-empty"><span>No completed payments yet.</span></div>
+  {% endif %}
+{% endmacro %}
+
+{# --- share bars, built on native <progress> ------------------------------ #}
+{% macro share_bars(mapping, total, labels={}, money=false, currency='GHS') %}
+  {% if mapping %}
+    <ul class="share-list">
+      {% for key, value in mapping.items() %}
+        <li class="share-row">
+          <span>{{ labels.get(key, key|replace('_', ' ')|title) }}</span>
+          <progress max="{{ total }}" value="{{ value }}">
+            {{ (value / total * 100)|round(0) }}%
+          </progress>
+          <strong>
+            {% if money %}{{ currency }} {{ '%.2f'|format(value / 100) }}
+            {% else %}{{ value }}{% endif %}
+          </strong>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted text-small">Nothing recorded yet.</p>
+  {% endif %}
+{% endmacro %}
+
+{# --- the contact card ----------------------------------------------------
+     One macro renders the card in the editor preview and on the public page,
+     so the preview cannot drift from what visitors actually see.
+   ------------------------------------------------------------------------ #}
+{% macro contact_card(profile, vcf_url=None, interactive=true, preview=false) %}
+  <div class="card-stage">
+    <article class="contact-card accent-{{ profile.accent or 'blue' }} {% if interactive %}tiltable deal-in{% endif %}"
+             {% if interactive %}data-tilt{% endif %}
+             {% if preview %}data-preview-card{% endif %}>
+      <div class="card-band"></div>
+
+      <div class="card-body">
+        {% if profile.avatar_filename %}
+          <img class="card-avatar"
+               src="{{ url_for('static', filename='img/avatars/' ~ profile.avatar_filename) }}"
+               alt="{{ profile.full_name }}" width="88" height="88">
+        {% else %}
+          <div class="card-avatar card-initials" aria-hidden="true">{{ profile.initials }}</div>
+        {% endif %}
+
+        <h1 class="card-name" {% if preview %}data-preview-name{% endif %}>{{ profile.full_name }}</h1>
+
+        {% if profile.job_title or preview %}
+          <p class="card-role" {% if preview %}data-preview-role{% endif %}
+             {% if not profile.job_title %}hidden{% endif %}>{{ profile.job_title }}</p>
+        {% endif %}
+
+        {% if profile.organisation or preview %}
+          <p class="card-org" {% if preview %}data-preview-org{% endif %}
+             {% if not profile.organisation %}hidden{% endif %}>{{ profile.organisation }}</p>
+        {% endif %}
+
+        {% if profile.bio or preview %}
+          <p class="card-bio" {% if preview %}data-preview-bio{% endif %}
+             {% if not profile.bio %}hidden{% endif %}>{{ profile.bio }}</p>
+        {% endif %}
+
+        <ul class="card-contacts">
+          {% if profile.phone %}
+            <li><a href="tel:{{ profile.phone }}">
+              <span class="contact-icon" aria-hidden="true">Tel</span>
+              <span class="contact-text"><span>Call</span><strong>{{ profile.phone }}</strong></span>
+            </a></li>
+          {% endif %}
+          {% if profile.whatsapp %}
+            <li><a href="https://wa.me/{{ profile.whatsapp|replace('+', '')|replace('0', '233', 1) if profile.whatsapp.startswith('0') else profile.whatsapp|replace('+', '') }}">
+              <span class="contact-icon" aria-hidden="true">WA</span>
+              <span class="contact-text"><span>WhatsApp</span><strong>{{ profile.whatsapp }}</strong></span>
+            </a></li>
+          {% endif %}
+          {% if profile.email %}
+            <li><a href="mailto:{{ profile.email }}">
+              <span class="contact-icon" aria-hidden="true">@</span>
+              <span class="contact-text"><span>Email</span><strong>{{ profile.email }}</strong></span>
+            </a></li>
+          {% endif %}
+          {% if profile.website %}
+            <li><a href="{{ profile.website }}" rel="noopener">
+              <span class="contact-icon" aria-hidden="true">Web</span>
+              <span class="contact-text"><span>Website</span><strong>{{ profile.website|replace('https://', '')|replace('http://', '') }}</strong></span>
+            </a></li>
+          {% endif %}
+          {% if profile.location %}
+            <li><a href="https://maps.google.com/?q={{ profile.location|urlencode }}" rel="noopener">
+              <span class="contact-icon" aria-hidden="true">Map</span>
+              <span class="contact-text"><span>Located in</span><strong>{{ profile.location }}</strong></span>
+            </a></li>
+          {% endif %}
+        </ul>
+
+        {% if profile.social_links %}
+          <div class="card-socials">
+            {% for link in profile.social_links %}
+              <a class="social-chip" href="{{ link.url }}" rel="noopener me" target="_blank">{{ link.label }}</a>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if vcf_url %}
+          <a class="btn btn-dark btn-block btn-large card-save press" href="{{ vcf_url }}" download>
+            Save to contacts
+          </a>
+        {% endif %}
+
+        <p class="card-foot">
+          {% if preview %}
+            {{ config.SITE_URL|replace('https://', '')|replace('http://', '') }}/c/<span data-preview-slug>{{ profile.slug }}</span>
+          {% else %}
+            <a class="card-credit" href="{{ url_for('main.index') }}">
+              <img src="{{ url_for('static', filename='img/logo-small.png') }}"
+                   alt="" width="96" height="96" loading="lazy" decoding="async">
+              <span>{{ config.SITE_SHORT_NAME }}</span>
+            </a>
+          {% endif %}
+        </p>
+      </div>
+    </article>
+  </div>
+{% endmacro %}

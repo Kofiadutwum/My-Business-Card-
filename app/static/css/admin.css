@@ -1,0 +1,140 @@
+/* ==========================================================================
+   admin.css — administrator console
+
+   Visually distinct from the subscriber dashboard on purpose. Anyone who can
+   see this screen can suspend accounts and read revenue, and a screen with
+   that much power should never be mistaken for the ordinary one.
+   ========================================================================== */
+
+.admin-bar {
+  background: var(--ink);
+  color: var(--paper);
+  padding: var(--s-3) 0;
+  font-size: var(--t-micro);
+}
+
+.admin-bar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+
+.admin-bar strong {
+  font-weight: 700;
+}
+
+.admin-bar a {
+  color: var(--amber);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: var(--s-5);
+  align-items: start;
+}
+
+.admin-filters {
+  display: flex;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: var(--s-5);
+}
+
+.admin-filters input[type="search"] {
+  max-width: 18rem;
+}
+
+.money-figure {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.finance-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--s-4);
+  margin-bottom: var(--s-6);
+}
+
+.finance-note {
+  font-size: var(--t-micro);
+  color: var(--ash);
+  line-height: var(--leading-snug);
+  margin-top: var(--s-2);
+  max-width: 24rem;
+}
+
+.chase-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s-2);
+}
+
+.chase-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-sunk);
+  border-radius: var(--r-control);
+  font-size: var(--t-small);
+}
+
+.chase-row strong {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.client-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.client-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--purple-wash);
+  color: var(--purple-deep);
+  display: grid;
+  place-items: center;
+  font-size: var(--t-micro);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.client-identity div {
+  min-width: 0;
+}
+
+.client-identity strong {
+  display: block;
+  font-weight: 600;
+}
+
+.client-identity span {
+  display: block;
+  font-size: var(--t-micro);
+  color: var(--ash);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 62rem) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}

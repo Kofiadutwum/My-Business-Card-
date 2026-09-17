@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Pricing — {{ config.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="wrap">
+    <div class="section-head enter">
+      <h1>One payment a year</h1>
+      <p>
+        Every plan includes the card page, the QR code, the contact file and the
+        link that never changes. What differs is how many places you can point
+        people to, and whether you can see who is opening the card.
+      </p>
+    </div>
+
+    <div class="plan-grid">
+      {% for key, plan in plans.items() %}
+        <div class="panel lift enter enter-{{ loop.index }}">
+          <h3>{{ plan.label }}</h3>
+          <p class="stat-value">{{ currency }} {{ '%.0f'|format(plan.amount_minor / 100) }}</p>
+          <p class="text-small muted">per year</p>
+          <hr>
+          <p class="text-small">{{ plan.blurb }}</p>
+          <p class="text-small muted">Up to {{ plan.max_social_links }} social links.</p>
+          <a class="btn {% if key == 'professional' %}btn-primary{% else %}btn-ghost{% endif %} btn-block press"
+             href="{{ url_for('auth.register') }}">Choose {{ plan.label }}</a>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="panel enter enter-4">
+      <h3>Not sure which plan?</h3>
+      <p class="text-small">
+        Call or message us and we will set the card up with you. Most people
+        are live within ten minutes.
+      </p>
+      <div class="row">
+        <a class="btn btn-primary press" href="tel:+233{{ config.SUPPORT_PHONE[1:] }}">
+          {{ config.SUPPORT_PHONE }}
+        </a>
+        <a class="btn btn-ghost press"
+           href="https://wa.me/233{{ config.SUPPORT_PHONE[1:] }}" rel="noopener">WhatsApp</a>
+        <a class="btn btn-ghost press" href="mailto:{{ config.SUPPORT_EMAIL }}">Email us</a>
+      </div>
+    </div>
+
+    <div class="panel enter enter-4">
+      <h3>What happens when a plan expires</h3>
+      <p class="text-small">
+        The card stops resolving publicly and anyone opening the link sees a short
+        notice instead. Your details are not deleted. Signing in and renewing puts
+        the same card back at the same link, and contacts already saved on other
+        people's phones are unaffected — that file lives on their device now.
+      </p>
+      <p class="text-small muted">
+        There is a {{ config.GRACE_PERIOD_DAYS }}-day grace period after the expiry
+        date before the card goes dark.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}
