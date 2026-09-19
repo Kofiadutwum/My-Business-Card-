@@ -23,7 +23,7 @@ from werkzeug.utils import secure_filename
 
 from ..extensions import db
 from ..forms import ProfileForm, SocialLinkForm
-from ..models import CardView, Lead, SocialLink, utcnow
+from ..models import CardView, Lead, Profile, SocialLink, utcnow
 from ..utils.analytics import daily_series
 from ..utils.qr import qr_svg
 
@@ -85,22 +85,32 @@ def index():
         notice_days=current_app.config["RENEWAL_NOTICE_DAYS"],
     )
 
-
 @bp.route("/profile", methods=["GET", "POST"])
 @login_required
 def edit_profile():
     profile = current_user.profile
-    form = ProfileForm(obj=profile, original_slug=profile.slug if profile else None)
+
+    form = ProfileForm(
+        obj=profile,
+        original_slug=profile.slug if profile else None,
+    )
 
     if form.validate_on_submit():
+        if profile is None:
+            profile = Profile(user=current_user)
+            db.session.add(profile)
+
         form.populate_obj(profile)
+
         if form.avatar.data:
             filename = _save_avatar(form.avatar.data)
             if filename:
                 profile.avatar_filename = filename
-        # populate_obj would otherwise assign the FileStorage object itself
-        profile.avatar = None
+
+        form.avatar.data = None
+
         db.session.commit()
+
         flash("Card saved.", "success")
         return redirect(url_for("dashboard.index"))
 
@@ -110,7 +120,6 @@ def edit_profile():
         profile=profile,
         card_url=_card_url(profile) if profile else "",
     )
-
 
 @bp.route("/links", methods=["GET", "POST"])
 @login_required
