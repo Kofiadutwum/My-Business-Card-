@@ -26,12 +26,64 @@ from flask import (
 from flask_login import current_user, login_required
 
 from ..extensions import csrf, db
-from ..forms import CheckoutForm
+from ..forms import CheckoutForm, OtpForm
 from ..models import Payment, Subscription, utcnow
 from ..services import paystack
 from ..services.paystack import MOMO_PROVIDERS, PaymentError
 
 bp = Blueprint("billing", __name__, url_prefix="/billing")
+
+
+def _verify_payment(payment, gateway_data):
+    """Validate a successful gateway response against our local payment.
+
+    A gateway response is only acceptable when its reference, amount, and
+    currency exactly match the payment we created.
+    """
+    if gateway_data.get("status") != "success":
+        return False
+
+    reference = str(gateway_data.get("reference") or "")
+    amount = gateway_data.get("amount")
+    currency = str(gateway_data.get("currency") or "").upper()
+
+    if reference != payment.reference:
+        current_app.logger.warning(
+            "Payment reference mismatch: local=%s gateway=%s",
+            payment.reference,
+            reference,
+        )
+        return False
+
+    try:
+        amount = int(amount)
+    except (TypeError, ValueError):
+        current_app.logger.warning(
+            "Invalid payment amount for reference %s: %r",
+            payment.reference,
+            amount,
+        )
+        return False
+
+    if amount != payment.amount_minor:
+        current_app.logger.warning(
+            "Payment amount mismatch for %s: local=%s gateway=%s",
+            payment.reference,
+            payment.amount_minor,
+            amount,
+        )
+        return False
+
+    if currency != payment.currency.upper():
+        current_app.logger.warning(
+            "Payment currency mismatch for %s: local=%s gateway=%s",
+            payment.reference,
+            payment.currency,
+            currency,
+        )
+        return False
+
+    return True
 
 
 def _activate(payment):
@@ -121,9 +173,21 @@ def checkout():
                 provider=form.momo_provider.data,
                 metadata=metadata,
             )
+            status = data.get("status")
+
             payment.raw_response = str(data)
             db.session.commit()
-            return redirect(url_for("billing.pending", reference=payment.reference))
+
+            if status == "send_otp":
+                return redirect(url_for("billing.otp", reference=payment.reference))
+
+            if status == "pay_offline":
+                return redirect(url_for("billing.pending", reference=payment.reference))
+
+            payment.status = "failed"
+            db.session.commit()
+            flash("The Mobile Money payment could not be started.", "error")
+            return redirect(url_for("billing.checkout"))
 
         except PaymentError as exc:
             payment.status = "failed"
@@ -155,6 +219,35 @@ def pending(reference):
         provider_label=MOMO_PROVIDERS.get(payment.momo_provider, "your network"),
     )
 
+@bp.route("/otp/<reference>", methods=["GET", "POST"])
+@login_required
+def otp(reference):
+    payment = Payment.query.filter_by(reference=reference).first_or_404()
+    if payment.user_id != current_user.id:
+        abort(404)
+
+    if payment.status == "success":
+        return redirect(url_for("dashboard.index"))
+
+    form = OtpForm()
+
+    if form.validate_on_submit():
+        try:
+            data = paystack.submit_otp(form.otp.data, payment.reference)
+            payment.raw_response = str(data)
+            db.session.commit()
+            flash("OTP submitted. Waiting for payment confirmation.", "success")
+            return redirect(
+                url_for("billing.pending", reference=payment.reference)
+            )
+        except PaymentError as exc:
+            flash(str(exc), "error")
+
+    return render_template(
+        "billing/otp.html",
+        form=form,
+        payment=payment,
+    )
 
 @bp.route("/status/<reference>")
 @login_required
@@ -166,8 +259,12 @@ def status(reference):
 
     if payment.status == "pending":
         try:
-            data = paystack.verify(payment.reference)
-            if data.get("status") == "success":
+            data = paystack.verify(
+                payment.reference,
+                expected_amount=payment.amount_minor,
+                expected_currency=payment.currency,
+            )
+            if _verify_payment(payment, data):
                 payment.gateway_fee_minor = data.get("fees") or 0
                 _activate(payment)
         except PaymentError:
@@ -196,12 +293,19 @@ def callback():
         abort(404)
 
     try:
-        data = paystack.verify(reference)
+        data = paystack.verify(
+            reference,
+            expected_amount=payment.amount_minor,
+            expected_currency=payment.currency,
+        )
     except PaymentError as exc:
-        flash(f"{exc} Your card was not charged twice — check again shortly.", "warning")
+        flash(
+            f"{exc} Your card was not charged twice — check again shortly.",
+            "warning",
+        )
         return redirect(url_for("dashboard.index"))
 
-    if data.get("status") == "success":
+    if _verify_payment(payment, data):
         payment.gateway_fee_minor = data.get("fees") or 0
         subscription = _activate(payment)
         flash(
@@ -215,7 +319,6 @@ def callback():
     db.session.commit()
     flash("That payment did not go through. Nothing was charged.", "error")
     return redirect(url_for("billing.checkout"))
-
 
 @bp.route("/webhook", methods=["POST"])
 @csrf.exempt
@@ -251,11 +354,15 @@ def webhook():
     # Re-verify rather than trusting the payload. A replayed webhook body
     # with a forged amount is cheap to attempt and free to defend against.
     try:
-        confirmed = paystack.verify(reference)
+        confirmed = paystack.verify(
+            reference,
+            expected_amount=payment.amount_minor,
+            expected_currency=payment.currency,
+        )
     except PaymentError:
         return "", 200
 
-    if confirmed.get("status") == "success":
+    if _verify_payment(payment, confirmed):
         payment.gateway_fee_minor = confirmed.get("fees") or data.get("fees") or 0
         payment.raw_response = str(data)[:5000]
         _activate(payment)

@@ -36,21 +36,21 @@ class BaseConfig:
     PLANS = {
         "starter": {
             "label": "Starter",
-            "amount_minor": 12000,
+            "amount_minor": 5000,
             "months": 12,
             "max_social_links": 5,
             "blurb": "One card, QR sharing, five social links.",
         },
         "professional": {
             "label": "Professional",
-            "amount_minor": 25000,
+            "amount_minor": 10000,
             "months": 12,
             "max_social_links": 12,
             "blurb": "Custom link, twelve social links, scan analytics.",
         },
         "business": {
             "label": "Business",
-            "amount_minor": 60000,
+            "amount_minor": 25000,
             "months": 12,
             "max_social_links": 25,
             "blurb": "Everything in Professional, plus team billing.",

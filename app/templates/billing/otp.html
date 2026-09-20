@@ -1,0 +1,41 @@
+@'
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="mb-3">Confirm your payment</h2>
+
+                    <p class="text-muted">
+                        Enter the one-time code sent to you to complete your
+                        Mobile Money payment.
+                    </p>
+
+                    <form method="post">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.otp.label(class="form-label") }}
+                            {{ form.otp(class="form-control", autocomplete="one-time-code", inputmode="numeric") }}
+
+                            {% for error in form.otp.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        {{ form.submit(class="btn btn-primary w-100") }}
+                    </form>
+
+                    <p class="text-muted small mt-3 mb-0">
+                        Reference: {{ payment.reference }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+'@ | Set-Content app\templates\billing\otp.html

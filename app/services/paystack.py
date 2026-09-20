@@ -160,21 +160,23 @@ def submit_otp(otp, reference):
 # --------------------------------------------------------------------------
 # Verification and webhooks
 # --------------------------------------------------------------------------
-def verify(reference):
+def verify(reference, expected_amount=None, expected_currency=None):
     """Confirm a transaction's real status with the gateway.
 
-    Never trust the browser's word that a payment succeeded. The only
-    trustworthy answers come from this call and from a signed webhook.
+    In sandbox mode, return the expected local values so the simulation
+    follows the same validation path as a real transaction.
     """
     if _sandbox():
         return {
             "status": "success",
             "reference": reference,
-            "amount": None,
+            "amount": expected_amount,
+            "currency": expected_currency or current_app.config["CURRENCY"],
             "channel": "simulated",
             "fees": 0,
             "simulated": True,
         }
+
     return _get(f"/transaction/verify/{reference}")["data"]
 
 
