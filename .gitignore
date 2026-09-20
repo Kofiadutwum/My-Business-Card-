@@ -8,3 +8,6 @@ app/static/img/avatars/*
 venv/
 .venv/
 migrations/versions/*.pyc
+
+!app/static/img/avatars/gallery/
+!app/static/img/avatars/gallery/*.jpg
