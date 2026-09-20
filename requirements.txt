@@ -11,3 +11,4 @@ segno==1.6.1
 Werkzeug==3.0.3
 gunicorn==22.0.0
 psycopg2-binary==2.9.13
+resend==2.47.0
