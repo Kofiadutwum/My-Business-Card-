@@ -1,21 +1,45 @@
 {% extends "dashboard/_shell.html" %}
 
-{% block title %}Waiting for your approval — {{ config.SITE_NAME }}{% endblock %}
+{% block title %}
+  {% if config.PAYMENT_SANDBOX %}
+    Test payment &mdash; {{ config.SITE_NAME }}
+  {% else %}
+    Waiting for your approval &mdash; {{ config.SITE_NAME }}
+  {% endif %}
+{% endblock %}
 
 {% block console %}
 <div class="panel waiting enter" data-poll-url="{{ url_for('billing.status', reference=payment.reference) }}">
-  <div class="waiting-mark is-waiting" data-poll-mark aria-hidden="true">₵</div>
+  <div class="waiting-mark is-waiting" data-poll-mark aria-hidden="true">&#8373;</div>
 
-  <h1>Check your phone</h1>
+  <h1>
+    {% if config.PAYMENT_SANDBOX %}
+      Test payment in progress
+    {% else %}
+      Check your phone
+    {% endif %}
+  </h1>
+
   <p data-poll-status>
-    A payment request for {{ payment.amount_minor | pesewas }} has gone to
-    {{ payment.momo_phone }} on {{ provider_label }}. Approve it to finish.
+    {% if config.PAYMENT_SANDBOX %}
+      This is a Paystack sandbox test. No real money will be charged and no
+      mobile-money prompt will be sent to your phone.
+    {% else %}
+      A payment request for {{ payment.amount_minor | pesewas }} has gone to
+      {{ payment.momo_phone }} on {{ provider_label }}. Approve it to finish.
+    {% endif %}
   </p>
 
   <ol class="waiting-steps">
-    <li>A prompt appears on your phone. If nothing arrives after a minute, dial your network's MoMo short code and check pending approvals.</li>
-    <li>Enter your mobile money PIN to approve the payment.</li>
-    <li>This page updates on its own. There is nothing else to click here.</li>
+    {% if config.PAYMENT_SANDBOX %}
+      <li>The payment is being simulated in test mode.</li>
+      <li>No MoMo PIN or phone approval is required.</li>
+      <li>This page updates automatically when the test payment is completed.</li>
+    {% else %}
+      <li>A prompt appears on your phone. If nothing arrives after a minute, dial your network's MoMo short code and check pending approvals.</li>
+      <li>Enter your mobile money PIN to approve the payment.</li>
+      <li>This page updates on its own. There is nothing else to click here.</li>
+    {% endif %}
   </ol>
 
   <div hidden data-poll-fallback>
