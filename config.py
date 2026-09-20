@@ -67,6 +67,7 @@ class BaseConfig:
     # With no live keys present the gateway runs in simulation mode so the
     # whole flow can be demonstrated offline.
     PAYMENT_SANDBOX = os.environ.get("PAYMENT_SANDBOX", "1") == "1"
+    PAYMENT_SANDBOX_OUTCOME = os.environ.get("PAYMENT_SANDBOX_OUTCOME", "success")
 
     # --- SMS --------------------------------------------------------------
     # 'console' prints instead of sending, which is the default so that a

@@ -167,8 +167,13 @@ def verify(reference, expected_amount=None, expected_currency=None):
     follows the same validation path as a real transaction.
     """
     if _sandbox():
+        outcome = current_app.config.get("PAYMENT_SANDBOX_OUTCOME", "success")
+
+        if outcome not in {"success", "failed", "abandoned"}:
+            outcome = "success"
+
         return {
-            "status": "success",
+            "status": outcome,
             "reference": reference,
             "amount": expected_amount,
             "currency": expected_currency or current_app.config["CURRENCY"],

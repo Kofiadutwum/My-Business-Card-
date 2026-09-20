@@ -254,6 +254,7 @@ def otp(reference):
 def status(reference):
     """Polled by the pending page. Returns JSON, not HTML."""
     payment = Payment.query.filter_by(reference=reference).first_or_404()
+
     if payment.user_id != current_user.id:
         abort(404)
 
@@ -264,9 +265,18 @@ def status(reference):
                 expected_amount=payment.amount_minor,
                 expected_currency=payment.currency,
             )
-            if _verify_payment(payment, data):
+
+            if (
+                current_app.config["PAYMENT_SANDBOX"]
+                and data.get("status") in {"failed", "abandoned"}
+            ):
+                payment.status = data["status"]
+                db.session.commit()
+
+            elif _verify_payment(payment, data):
                 payment.gateway_fee_minor = data.get("fees") or 0
                 _activate(payment)
+
         except PaymentError:
             pass  # keep polling; the webhook is still the safety net
 
@@ -274,10 +284,13 @@ def status(reference):
         {
             "reference": payment.reference,
             "status": payment.status,
-            "redirect": url_for("dashboard.index") if payment.status == "success" else None,
+            "redirect": (
+                url_for("dashboard.index")
+                if payment.status == "success"
+                else None
+            ),
         }
     )
-
 
 @bp.route("/callback")
 @login_required
