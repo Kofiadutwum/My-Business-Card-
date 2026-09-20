@@ -30,31 +30,69 @@ def _aware(value):
     """SQLite hands back naive datetimes; normalise before comparing."""
     if value is None:
         return None
+
     if value.tzinfo is None:
         return value.replace(tzinfo=timezone.utc)
+
     return value
 
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(255), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False, nullable=False)
-    is_suspended = db.Column(db.Boolean, default=False, nullable=False)
-    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
-    last_login_at = db.Column(db.DateTime)
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+    )
+
+    email = db.Column(
+        db.String(255),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+
+    password_hash = db.Column(
+        db.String(255),
+        nullable=False,
+    )
+
+    is_admin = db.Column(
+        db.Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    is_suspended = db.Column(
+        db.Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        nullable=False,
+    )
+
+    last_login_at = db.Column(
+        db.DateTime,
+    )
 
     profile = db.relationship(
-        "Profile", back_populates="user", uselist=False, cascade="all, delete-orphan"
+        "Profile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
+
     subscriptions = db.relationship(
         "Subscription",
         back_populates="user",
         cascade="all, delete-orphan",
         order_by="Subscription.expires_at.desc()",
     )
+
     payments = db.relationship(
         "Payment",
         back_populates="user",
@@ -62,32 +100,44 @@ class User(UserMixin, db.Model):
         order_by="Payment.created_at.desc()",
     )
 
-    # --- password -------------------------------------------------------
     def set_password(self, raw):
         self.password_hash = generate_password_hash(raw)
 
     def check_password(self, raw):
-        return check_password_hash(self.password_hash, raw)
+        return check_password_hash(
+            self.password_hash,
+            raw,
+        )
 
-    # --- subscription state ---------------------------------------------
     @property
     def current_subscription(self):
         """The subscription with the furthest expiry, active or not."""
         if not self.subscriptions:
             return None
+
         return self.subscriptions[0]
 
     @property
     def is_subscription_active(self):
         sub = self.current_subscription
-        return bool(sub and sub.is_active)
+
+        return bool(
+            sub
+            and sub.is_active
+        )
 
     @property
     def days_to_expiry(self):
         sub = self.current_subscription
+
         if not sub:
             return None
-        delta = _aware(sub.expires_at) - utcnow()
+
+        delta = (
+            _aware(sub.expires_at)
+            - utcnow()
+        )
+
         return delta.days
 
     def __repr__(self):
@@ -96,7 +146,10 @@ class User(UserMixin, db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, int(user_id))
+    return db.session.get(
+        User,
+        int(user_id),
+    )
 
 
 class Profile(db.Model):
@@ -104,50 +157,139 @@ class Profile(db.Model):
 
     __tablename__ = "profiles"
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
     )
 
-    slug = db.Column(db.String(64), unique=True, nullable=False, index=True)
-    full_name = db.Column(db.String(120), nullable=False)
-    job_title = db.Column(db.String(120))
-    organisation = db.Column(db.String(160))
-    phone = db.Column(db.String(32))
-    whatsapp = db.Column(db.String(32))
-    email = db.Column(db.String(255))
-    website = db.Column(db.String(255))
-    location = db.Column(db.String(160))
-    bio = db.Column(db.Text)
-    avatar_filename = db.Column(db.String(255))
-    accent = db.Column(db.String(16), default="blue", nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        unique=True,
+    )
 
-    is_published = db.Column(db.Boolean, default=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
-    updated_at = db.Column(db.DateTime, default=utcnow, onupdate=utcnow, nullable=False)
+    slug = db.Column(
+        db.String(64),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
 
-    user = db.relationship("User", back_populates="profile")
+    full_name = db.Column(
+        db.String(120),
+        nullable=False,
+    )
+
+    job_title = db.Column(
+        db.String(120),
+    )
+
+    organisation = db.Column(
+        db.String(160),
+    )
+
+    phone = db.Column(
+        db.String(32),
+    )
+
+    whatsapp = db.Column(
+        db.String(32),
+    )
+
+    email = db.Column(
+        db.String(255),
+    )
+
+    website = db.Column(
+        db.String(255),
+    )
+
+    location = db.Column(
+        db.String(160),
+    )
+
+    bio = db.Column(
+        db.Text,
+    )
+
+    avatar_filename = db.Column(
+        db.String(255),
+    )
+
+    accent = db.Column(
+        db.String(16),
+        default="blue",
+        nullable=False,
+    )
+
+    is_published = db.Column(
+        db.Boolean,
+        default=True,
+        nullable=False,
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        nullable=False,
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        onupdate=utcnow,
+        nullable=False,
+    )
+
+    user = db.relationship(
+        "User",
+        back_populates="profile",
+    )
+
     social_links = db.relationship(
         "SocialLink",
         back_populates="profile",
         cascade="all, delete-orphan",
         order_by="SocialLink.position",
     )
-    views = db.relationship("CardView", back_populates="profile", cascade="all, delete-orphan")
+
+    views = db.relationship(
+        "CardView",
+        back_populates="profile",
+        cascade="all, delete-orphan",
+    )
 
     @property
     def is_live(self):
         """A card is served publicly only when paid for and published."""
-        return self.is_published and self.user.is_subscription_active and not self.user.is_suspended
+        return (
+            self.is_published
+            and self.user.is_subscription_active
+            and not self.user.is_suspended
+        )
 
     @property
     def initials(self):
-        parts = [p for p in (self.full_name or "").split() if p]
+        parts = [
+            p
+            for p in (self.full_name or "").split()
+            if p
+        ]
+
         if not parts:
             return "?"
+
         if len(parts) == 1:
             return parts[0][:2].upper()
-        return (parts[0][0] + parts[-1][0]).upper()
+
+        return (
+            parts[0][0]
+            + parts[-1][0]
+        ).upper()
 
     @property
     def view_count(self):
@@ -160,7 +302,6 @@ class Profile(db.Model):
 class SocialLink(db.Model):
     __tablename__ = "social_links"
 
-    # Keys map to the icon set in static/img and to vCard X-SOCIALPROFILE types
     PLATFORMS = {
         "linkedin": "LinkedIn",
         "x": "X",
@@ -178,228 +319,587 @@ class SocialLink(db.Model):
         "website": "Website",
     }
 
-    id = db.Column(db.Integer, primary_key=True)
-    profile_id = db.Column(
-        db.Integer, db.ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
     )
-    platform = db.Column(db.String(32), nullable=False)
-    url = db.Column(db.String(500), nullable=False)
-    position = db.Column(db.Integer, default=0, nullable=False)
 
-    profile = db.relationship("Profile", back_populates="social_links")
+    profile_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "profiles.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
+
+    platform = db.Column(
+        db.String(32),
+        nullable=False,
+    )
+
+    url = db.Column(
+        db.String(500),
+        nullable=False,
+    )
+
+    position = db.Column(
+        db.Integer,
+        default=0,
+        nullable=False,
+    )
+
+    profile = db.relationship(
+        "Profile",
+        back_populates="social_links",
+    )
 
     @property
     def label(self):
-        return self.PLATFORMS.get(self.platform, self.platform.title())
+        return self.PLATFORMS.get(
+            self.platform,
+            self.platform.title(),
+        )
 
 
 class Subscription(db.Model):
     __tablename__ = "subscriptions"
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
     )
-    plan = db.Column(db.String(32), nullable=False)
-    starts_at = db.Column(db.DateTime, default=utcnow, nullable=False)
-    expires_at = db.Column(db.DateTime, nullable=False)
-    cancelled_at = db.Column(db.DateTime)
 
-    user = db.relationship("User", back_populates="subscriptions")
-    payment = db.relationship("Payment", back_populates="subscription", uselist=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
+
+    plan = db.Column(
+        db.String(32),
+        nullable=False,
+    )
+
+    starts_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        nullable=False,
+    )
+
+    expires_at = db.Column(
+        db.DateTime,
+        nullable=False,
+    )
+
+    cancelled_at = db.Column(
+        db.DateTime,
+    )
+
+    user = db.relationship(
+        "User",
+        back_populates="subscriptions",
+    )
+
+    payment = db.relationship(
+        "Payment",
+        back_populates="subscription",
+        uselist=False,
+    )
 
     @property
     def is_active(self):
         if self.cancelled_at:
             return False
-        grace = timedelta(days=current_app.config["GRACE_PERIOD_DAYS"])
-        return utcnow() <= _aware(self.expires_at) + grace
+
+        grace = timedelta(
+            days=current_app.config[
+                "GRACE_PERIOD_DAYS"
+            ]
+        )
+
+        return (
+            utcnow()
+            <= _aware(self.expires_at)
+            + grace
+        )
 
     @property
     def in_grace_period(self):
         now = utcnow()
-        expiry = _aware(self.expires_at)
-        grace = timedelta(days=current_app.config["GRACE_PERIOD_DAYS"])
-        return expiry < now <= expiry + grace
+        expiry = _aware(
+            self.expires_at
+        )
+
+        grace = timedelta(
+            days=current_app.config[
+                "GRACE_PERIOD_DAYS"
+            ]
+        )
+
+        return (
+            expiry < now
+            <= expiry + grace
+        )
 
     @property
     def status(self):
         if self.cancelled_at:
             return "cancelled"
+
         if self.in_grace_period:
             return "grace"
-        return "active" if self.is_active else "expired"
+
+        return (
+            "active"
+            if self.is_active
+            else "expired"
+        )
 
     @classmethod
-    def start_or_extend(cls, user, plan_key, months):
-        """Renewal extends from the existing expiry, not from today.
+    def start_or_extend(
+        cls,
+        user,
+        plan_key,
+        months,
+    ):
+        """Renewal extends from the existing expiry, not from today."""
 
-        Paying three days early must not cost the subscriber three days.
-        Paying after a lapse restarts from today, because those days are gone.
-        """
         now = utcnow()
+
         existing = user.current_subscription
-        if existing and _aware(existing.expires_at) > now and not existing.cancelled_at:
-            base = _aware(existing.expires_at)
+
+        if (
+            existing
+            and _aware(existing.expires_at) > now
+            and not existing.cancelled_at
+        ):
+            base = _aware(
+                existing.expires_at
+            )
         else:
             base = now
+
         return cls(
             user=user,
             plan=plan_key,
             starts_at=now,
-            expires_at=base + timedelta(days=30 * months),
+            expires_at=(
+                base
+                + timedelta(
+                    days=30 * months
+                )
+            ),
         )
 
 
 class Payment(db.Model):
     __tablename__ = "payments"
 
-    STATUSES = ("pending", "success", "failed", "abandoned")
-    CHANNELS = ("card", "mobile_money")
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    STATUSES = (
+        "pending",
+        "success",
+        "failed",
+        "abandoned",
     )
-    subscription_id = db.Column(db.Integer, db.ForeignKey("subscriptions.id"))
 
-    reference = db.Column(db.String(64), unique=True, nullable=False, index=True)
-    gateway = db.Column(db.String(32), default="paystack", nullable=False)
-    plan = db.Column(db.String(32), nullable=False)
-    amount_minor = db.Column(db.Integer, nullable=False)  # pesewas
-    currency = db.Column(db.String(8), default="GHS", nullable=False)
-    channel = db.Column(db.String(32), nullable=False)
-    momo_provider = db.Column(db.String(16))  # mtn | atl | vod
-    momo_phone = db.Column(db.String(32))
-    status = db.Column(db.String(16), default="pending", nullable=False, index=True)
-    gateway_fee_minor = db.Column(db.Integer, default=0, nullable=False)
-    raw_response = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=utcnow, nullable=False, index=True)
-    paid_at = db.Column(db.DateTime)
+    CHANNELS = (
+        "card",
+        "mobile_money",
+    )
 
-    user = db.relationship("User", back_populates="payments")
-    subscription = db.relationship("Subscription", back_populates="payment")
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
+
+    subscription_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "subscriptions.id",
+        ),
+    )
+
+    reference = db.Column(
+        db.String(64),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+
+    gateway = db.Column(
+        db.String(32),
+        default="paystack",
+        nullable=False,
+    )
+
+    plan = db.Column(
+        db.String(32),
+        nullable=False,
+    )
+
+    amount_minor = db.Column(
+        db.Integer,
+        nullable=False,
+    )
+
+    currency = db.Column(
+        db.String(8),
+        default="GHS",
+        nullable=False,
+    )
+
+    channel = db.Column(
+        db.String(32),
+        nullable=False,
+    )
+
+    momo_provider = db.Column(
+        db.String(16),
+    )
+
+    momo_phone = db.Column(
+        db.String(32),
+    )
+
+    status = db.Column(
+        db.String(16),
+        default="pending",
+        nullable=False,
+        index=True,
+    )
+
+    gateway_fee_minor = db.Column(
+        db.Integer,
+        default=0,
+        nullable=False,
+    )
+
+    raw_response = db.Column(
+        db.Text,
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        nullable=False,
+        index=True,
+    )
+
+    paid_at = db.Column(
+        db.DateTime,
+    )
+
+    user = db.relationship(
+        "User",
+        back_populates="payments",
+    )
+
+    subscription = db.relationship(
+        "Subscription",
+        back_populates="payment",
+    )
 
     @property
     def amount(self):
-        """Major units, for display only. Never use for arithmetic."""
+        """Major units, for display only."""
         return self.amount_minor / 100
 
     @property
     def net_minor(self):
-        return self.amount_minor - (self.gateway_fee_minor or 0)
+        return (
+            self.amount_minor
+            - (self.gateway_fee_minor or 0)
+        )
 
 
 class CardView(db.Model):
-    """One row per public card open. The raw material for analytics."""
+    """One row per public card open."""
 
     __tablename__ = "card_views"
 
-    id = db.Column(db.Integer, primary_key=True)
-    profile_id = db.Column(
-        db.Integer, db.ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
     )
-    viewed_at = db.Column(db.DateTime, default=utcnow, nullable=False, index=True)
-    source = db.Column(db.String(16), default="link", nullable=False)  # link | qr | nfc
-    action = db.Column(db.String(16), default="view", nullable=False)  # view | vcf | tap
-    visitor_hash = db.Column(db.String(64))  # salted, not reversible to an IP
-    user_agent = db.Column(db.String(255))
 
-    profile = db.relationship("Profile", back_populates="views")
+    profile_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "profiles.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    viewed_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        nullable=False,
+        index=True,
+    )
+
+    source = db.Column(
+        db.String(16),
+        default="link",
+        nullable=False,
+    )
+
+    action = db.Column(
+        db.String(16),
+        default="view",
+        nullable=False,
+    )
+
+    visitor_hash = db.Column(
+        db.String(64),
+    )
+
+    user_agent = db.Column(
+        db.String(255),
+    )
+
+    profile = db.relationship(
+        "Profile",
+        back_populates="views",
+    )
 
 
 class Notification(db.Model):
-    """One row per reminder actually sent.
-
-    This table exists for one reason: so a reminder is never sent twice. The
-    unique constraint on (subscription_id, kind) is the guard. Without it, a
-    cron job that runs twice — or a server that runs two workers — texts your
-    customer the same warning twice, and you pay for both messages.
-    """
+    """One row per reminder actually sent."""
 
     __tablename__ = "notifications"
+
     __table_args__ = (
-        db.UniqueConstraint("subscription_id", "kind", name="uq_notification_once"),
+        db.UniqueConstraint(
+            "subscription_id",
+            "kind",
+            name="uq_notification_once",
+        ),
     )
 
-    # Reminder points, named by days remaining. 'expired' fires once, on the
-    # day the grace period ends and the card actually goes dark.
-    #
-    # The last two are transactional rather than scheduled and are written
-    # with subscription_id = NULL, which puts them outside the unique
-    # constraint above. Leads and recovered payments can legitimately recur;
-    # suppressing the second one as a "duplicate" would lose a real customer.
-    KINDS = ("renewal_30", "renewal_7", "renewal_1", "expired", "lead", "recovered")
+    KINDS = (
+        "renewal_30",
+        "renewal_7",
+        "renewal_1",
+        "expired",
+        "lead",
+        "recovered",
+    )
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+    )
+
     user_id = db.Column(
-        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+        db.Integer,
+        db.ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
     )
-    subscription_id = db.Column(db.Integer, db.ForeignKey("subscriptions.id", ondelete="CASCADE"))
 
-    kind = db.Column(db.String(32), nullable=False)
-    channel = db.Column(db.String(16), default="sms", nullable=False)
-    destination = db.Column(db.String(64))
-    body = db.Column(db.Text)
-    status = db.Column(db.String(16), default="sent", nullable=False)  # sent | failed
-    provider = db.Column(db.String(32))
-    provider_ref = db.Column(db.String(128))
-    error = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime, default=utcnow, nullable=False, index=True)
+    subscription_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "subscriptions.id",
+            ondelete="CASCADE",
+        ),
+    )
+
+    kind = db.Column(
+        db.String(32),
+        nullable=False,
+    )
+
+    channel = db.Column(
+        db.String(16),
+        default="sms",
+        nullable=False,
+    )
+
+    destination = db.Column(
+        db.String(64),
+    )
+
+    body = db.Column(
+        db.Text,
+    )
+
+    status = db.Column(
+        db.String(16),
+        default="sent",
+        nullable=False,
+    )
+
+    provider = db.Column(
+        db.String(32),
+    )
+
+    provider_ref = db.Column(
+        db.String(128),
+    )
+
+    error = db.Column(
+        db.String(255),
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        nullable=False,
+        index=True,
+    )
 
     user = db.relationship("User")
 
     def __repr__(self):
-        return f"<Notification {self.kind} -> {self.destination} ({self.status})>"
+        return (
+            f"<Notification "
+            f"{self.kind} -> "
+            f"{self.destination} "
+            f"({self.status})>"
+        )
 
 
 class Lead(db.Model):
-    """Contact details a visitor sent back to the card owner.
-
-    The feature that makes this more than a digital business card. A paper
-    card is one-directional: you hand it over and hope. Here the person
-    holding your card can push their own details back to you in one step,
-    while they are still standing in front of you.
-    """
+    """Contact details a visitor sent back to the card owner."""
 
     __tablename__ = "leads"
 
-    id = db.Column(db.Integer, primary_key=True)
-    profile_id = db.Column(
-        db.Integer, db.ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
     )
 
-    name = db.Column(db.String(120), nullable=False)
-    phone = db.Column(db.String(32))
-    email = db.Column(db.String(255))
-    organisation = db.Column(db.String(160))
-    note = db.Column(db.Text)
+    profile_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "profiles.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
 
-    source = db.Column(db.String(16), default="link", nullable=False)
-    visitor_hash = db.Column(db.String(64), index=True)
-    is_read = db.Column(db.Boolean, default=False, nullable=False)
-    created_at = db.Column(db.DateTime, default=utcnow, nullable=False, index=True)
+    name = db.Column(
+        db.String(120),
+        nullable=False,
+    )
 
-    profile = db.relationship("Profile", backref=db.backref("leads", cascade="all, delete-orphan"))
+    phone = db.Column(
+        db.String(32),
+    )
+
+    email = db.Column(
+        db.String(255),
+    )
+
+    organisation = db.Column(
+        db.String(160),
+    )
+
+    note = db.Column(
+        db.Text,
+    )
+
+    source = db.Column(
+        db.String(16),
+        default="link",
+        nullable=False,
+    )
+
+    visitor_hash = db.Column(
+        db.String(64),
+        index=True,
+    )
+
+    is_read = db.Column(
+        db.Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        nullable=False,
+        index=True,
+    )
+
+    profile = db.relationship(
+        "Profile",
+        backref=db.backref(
+            "leads",
+            cascade="all, delete-orphan",
+        ),
+    )
 
     def __repr__(self):
-        return f"<Lead {self.name} -> {self.profile_id}>"
+        return (
+            f"<Lead "
+            f"{self.name} -> "
+            f"{self.profile_id}>"
+        )
+
 
 class GalleryImage(db.Model):
     """An image displayed in the public homepage gallery."""
 
     __tablename__ = "gallery_images"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+    )
 
-    filename = db.Column(db.String(255), nullable=False)
-    title = db.Column(db.String(160))
-    description = db.Column(db.Text)
+    filename = db.Column(
+        db.String(255),
+        nullable=False,
+    )
 
-    display_order = db.Column(db.Integer, default=0, nullable=False)
-    is_published = db.Column(db.Boolean, default=True, nullable=False)
+    title = db.Column(
+        db.String(160),
+    )
 
-    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
+    description = db.Column(
+        db.Text,
+    )
+
+    display_order = db.Column(
+        db.Integer,
+        default=0,
+        nullable=False,
+    )
+
+    is_published = db.Column(
+        db.Boolean,
+        default=True,
+        nullable=False,
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        nullable=False,
+    )
+
     updated_at = db.Column(
         db.DateTime,
         default=utcnow,
@@ -409,3 +909,270 @@ class GalleryImage(db.Model):
 
     def __repr__(self):
         return f"<GalleryImage {self.filename}>"
+
+
+class NFCOrder(db.Model):
+    """Physical NFC card orders placed by customers."""
+
+    __tablename__ = "nfc_orders"
+
+    ORDER_TYPES = (
+        "digital_and_nfc",
+        "nfc_only",
+        "replacement",
+    )
+
+    STATUSES = (
+        "pending",
+        "paid",
+        "design_pending",
+        "designing",
+        "ready",
+        "delivered",
+        "cancelled",
+    )
+
+    PAYMENT_STATUSES = (
+        "pending",
+        "success",
+        "failed",
+        "abandoned",
+    )
+
+    NFC_PRICES_MINOR = {
+        1: 20000,
+        5: 75000,
+    }
+
+    REPLACEMENT_DISCOUNT = 0.30
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    profile_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "profiles.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    order_number = db.Column(
+        db.String(32),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+
+    order_type = db.Column(
+        db.String(32),
+        nullable=False,
+        index=True,
+    )
+
+    quantity = db.Column(
+        db.Integer,
+        nullable=False,
+    )
+
+    nfc_price_minor = db.Column(
+        db.Integer,
+        nullable=False,
+    )
+
+    discount_minor = db.Column(
+        db.Integer,
+        default=0,
+        nullable=False,
+    )
+
+    digital_plan = db.Column(
+        db.String(32),
+    )
+
+    digital_plan_price_minor = db.Column(
+        db.Integer,
+        default=0,
+        nullable=False,
+    )
+
+    total_amount_minor = db.Column(
+        db.Integer,
+        nullable=False,
+    )
+
+    currency = db.Column(
+        db.String(8),
+        default="GHS",
+        nullable=False,
+    )
+
+    full_name = db.Column(
+        db.String(120),
+        nullable=False,
+    )
+
+    position = db.Column(
+        db.String(120),
+    )
+
+    email = db.Column(
+        db.String(255),
+        nullable=False,
+    )
+
+    phone = db.Column(
+        db.String(32),
+        nullable=False,
+    )
+
+    delivery_location = db.Column(
+        db.String(255),
+        nullable=False,
+    )
+
+    logo_filename = db.Column(
+        db.String(255),
+    )
+
+    design_instructions = db.Column(
+        db.Text,
+    )
+
+    replacement_reason = db.Column(
+        db.String(64),
+    )
+
+    payment_reference = db.Column(
+        db.String(128),
+        unique=True,
+        index=True,
+    )
+
+    payment_status = db.Column(
+        db.String(16),
+        default="pending",
+        nullable=False,
+        index=True,
+    )
+
+    paid_at = db.Column(
+        db.DateTime,
+    )
+
+    status = db.Column(
+        db.String(32),
+        default="pending",
+        nullable=False,
+        index=True,
+    )
+
+    # Records when the successful-payment notification was sent
+    # to the AD Smart Business Cards administrator.
+    #
+    # This prevents duplicate notification emails when Paystack
+    # sends the same payment confirmation more than once.
+    admin_notified_at = db.Column(
+        db.DateTime,
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        nullable=False,
+        index=True,
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        onupdate=utcnow,
+        nullable=False,
+    )
+
+    user = db.relationship(
+        "User",
+        backref=db.backref(
+            "nfc_orders",
+            cascade="all, delete-orphan",
+        ),
+    )
+
+    profile = db.relationship(
+        "Profile",
+        backref=db.backref(
+            "nfc_orders",
+            cascade="all, delete-orphan",
+        ),
+    )
+
+    @property
+    def nfc_price(self):
+        """NFC package price in major currency units."""
+        return self.nfc_price_minor / 100
+
+    @property
+    def discount(self):
+        """Discount amount in major currency units."""
+        return self.discount_minor / 100
+
+    @property
+    def digital_plan_price(self):
+        """Digital plan price in major currency units."""
+        return self.digital_plan_price_minor / 100
+
+    @property
+    def total_amount(self):
+        """Total order amount in major currency units."""
+        return self.total_amount_minor / 100
+
+    @classmethod
+    def calculate_nfc_price(
+        cls,
+        quantity,
+        replacement=False,
+    ):
+        """Return NFC price and discount in minor currency units."""
+
+        if quantity not in cls.NFC_PRICES_MINOR:
+            raise ValueError(
+                "NFC quantity must be either 1 or 5."
+            )
+
+        base_price = cls.NFC_PRICES_MINOR[
+            quantity
+        ]
+
+        if replacement:
+            discount = int(
+                base_price
+                * cls.REPLACEMENT_DISCOUNT
+            )
+
+            return (
+                base_price - discount,
+                discount,
+            )
+
+        return base_price, 0
+
+    def __repr__(self):
+        return (
+            f"<NFCOrder "
+            f"{self.order_number} "
+            f"{self.order_type}>"
+        )

@@ -1,0 +1,257 @@
+{% extends "dashboard/_shell.html" %}
+
+{% block title %}My NFC Cards{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">My NFC Cards</h1>
+            <p class="text-muted mb-0">
+                Manage your physical AD Smart Business Cards.
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('nfc.order') }}"
+            class="btn btn-primary"
+        >
+            Order NFC Cards
+        </a>
+    </div>
+
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        NFC cards owned
+                    </div>
+
+                    <div class="display-6 fw-bold mt-2">
+                        {{ cards_owned }}
+                    </div>
+
+                    <div class="text-muted small mt-2">
+                        Active paid orders
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Orders
+                    </div>
+
+                    <div class="display-6 fw-bold mt-2">
+                        {{ orders|length }}
+                    </div>
+
+                    <div class="text-muted small mt-2">
+                        NFC order history
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Replacement
+                    </div>
+
+                    <div class="mt-3">
+                        <a
+                            href="{{ url_for('nfc.order') }}"
+                            class="btn btn-outline-primary"
+                        >
+                            Replace a Card
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <div>
+                    <h2 class="h5 mb-1">
+                        NFC Orders
+                    </h2>
+
+                    <p class="text-muted small mb-0">
+                        Your physical card orders and their current status.
+                    </p>
+                </div>
+
+            </div>
+
+
+            {% if orders %}
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle">
+
+                        <thead>
+
+                            <tr>
+                                <th>Order</th>
+                                <th>Type</th>
+                                <th>Cards</th>
+                                <th>Amount</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for order in orders %}
+
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            {{ order.order_number }}
+                                        </strong>
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if order.order_type == "digital_and_nfc" %}
+                                            Digital + NFC
+                                        {% elif order.order_type == "nfc_only" %}
+                                            NFC Only
+                                        {% else %}
+                                            Replacement
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+                                        {{ order.quantity }}
+                                    </td>
+
+
+                                    <td>
+                                        {{ currency }}
+                                        {{ "%.2f"|format(order.total_amount) }}
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if order.payment_status == "success" %}
+
+                                            <span class="badge bg-success">
+                                                Paid
+                                            </span>
+
+                                        {% elif order.payment_status == "failed" %}
+
+                                            <span class="badge bg-danger">
+                                                Failed
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="badge bg-warning text-dark">
+                                                Pending
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            {{ order.status.replace("_", " ").title() }}
+                                        </span>
+                                    </td>
+
+
+                                    <td>
+                                        {{ order.created_at.strftime("%d %b %Y") }}
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="text-center py-5">
+
+                    <h3 class="h5">
+                        No NFC orders yet
+                    </h3>
+
+                    <p class="text-muted">
+                        Order your customised physical NFC card today.
+                    </p>
+
+                    <a
+                        href="{{ url_for('nfc.order') }}"
+                        class="btn btn-primary"
+                    >
+                        Order NFC Cards
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

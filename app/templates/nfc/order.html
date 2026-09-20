@@ -1,0 +1,609 @@
+{% extends "dashboard/_shell.html" %}
+
+{% block title %}Order NFC Cards — {{ config.SITE_NAME }}{% endblock %}
+
+{% block console %}
+
+<div class="console-head enter">
+  <div>
+    <h1>Order NFC Cards</h1>
+    <p>
+      Get customised NFC business cards designed by AD Graphics and linked
+      directly to your digital business card.
+    </p>
+  </div>
+</div>
+
+<form method="post"
+      enctype="multipart/form-data"
+      novalidate
+      data-guard>
+
+  {{ form.hidden_tag() }}
+
+  <div class="panel enter enter-1">
+
+    <h3>1. What would you like to order?</h3>
+
+    <div class="plan-options">
+
+      {% for value, label in form.order_type.choices %}
+
+        <label class="plan-option">
+          <input
+            type="radio"
+            name="{{ form.order_type.name }}"
+            value="{{ value }}"
+            {% if form.order_type.data == value %}checked{% endif %}
+          >
+
+          <span class="plan-option-main">
+
+            <strong>
+              {% if value == "digital_and_nfc" %}
+                Digital Card + NFC Cards
+              {% elif value == "nfc_only" %}
+                NFC Cards Only
+              {% else %}
+                Replace NFC Cards
+              {% endif %}
+            </strong>
+
+            <span>
+              {% if value == "digital_and_nfc" %}
+                Create or renew your digital card and order physical NFC cards.
+              {% elif value == "nfc_only" %}
+                Order additional NFC cards for your existing digital card.
+              {% else %}
+                Replace your existing NFC cards at a 30% discount.
+              {% endif %}
+            </span>
+
+          </span>
+
+        </label>
+
+      {% endfor %}
+
+    </div>
+
+    {% for error in form.order_type.errors %}
+      <span class="error-text">{{ error }}</span>
+    {% endfor %}
+
+  </div>
+
+
+  <div class="panel enter enter-2">
+
+    <h3>2. Digital card plan</h3>
+
+    <div class="plan-options">
+
+      {% for key, plan in plans.items() %}
+
+        <label class="plan-option">
+
+          <input
+            type="radio"
+            name="{{ form.plan.name }}"
+            value="{{ key }}"
+            {% if form.plan.data == key %}checked{% endif %}
+          >
+
+          <span class="plan-option-main">
+
+            <strong>{{ plan.label }}</strong>
+
+            <span>
+              {{ plan.blurb }}
+            </span>
+
+          </span>
+
+          <span class="plan-price">
+
+            {{ currency }}
+            {{ '%.0f'|format(plan.amount_minor / 100) }}
+
+            <small>per year</small>
+
+          </span>
+
+        </label>
+
+      {% endfor %}
+
+    </div>
+
+    {% for error in form.plan.errors %}
+      <span class="error-text">{{ error }}</span>
+    {% endfor %}
+
+    <p class="field-hint">
+      A digital plan is required when choosing
+      <strong>Digital Card + NFC Cards</strong>.
+      It is not required for NFC-only or replacement orders.
+    </p>
+
+  </div>
+
+
+  <div class="panel enter enter-3">
+
+    <h3>3. Choose your NFC cards</h3>
+
+    <div class="plan-options">
+
+      <label class="plan-option">
+
+        <input
+          type="radio"
+          name="{{ form.quantity.name }}"
+          value="1"
+          {% if form.quantity.data == "1" %}checked{% endif %}
+        >
+
+        <span class="plan-option-main">
+
+          <strong>1 NFC Card</strong>
+
+          <span>
+            One customised NFC business card.
+          </span>
+
+        </span>
+
+        <span class="plan-price">
+          {{ currency }} 200
+        </span>
+
+      </label>
+
+
+      <label class="plan-option">
+
+        <input
+          type="radio"
+          name="{{ form.quantity.name }}"
+          value="5"
+          {% if form.quantity.data == "5" %}checked{% endif %}
+        >
+
+        <span class="plan-option-main">
+
+          <strong>5 NFC Cards</strong>
+
+          <span>
+            Five customised NFC business cards.
+          </span>
+
+        </span>
+
+        <span class="plan-price">
+          {{ currency }} 750
+        </span>
+
+      </label>
+
+    </div>
+
+    {% for error in form.quantity.errors %}
+      <span class="error-text">{{ error }}</span>
+    {% endfor %}
+
+  </div>
+
+
+  <div class="panel enter enter-4">
+
+    <h3>4. Your card information</h3>
+
+    <div class="field">
+      {{ form.full_name.label }}
+      {{ form.full_name(
+        placeholder="Your full name",
+        autocomplete="name"
+      ) }}
+
+      {% for error in form.full_name.errors %}
+        <span class="error-text">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+
+    <div class="field">
+      {{ form.position.label }}
+      {{ form.position(
+        placeholder="e.g. Graphic Designer"
+      ) }}
+
+      {% for error in form.position.errors %}
+        <span class="error-text">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+
+    <div class="field">
+      {{ form.email.label }}
+      {{ form.email(
+        placeholder="you@example.com",
+        autocomplete="email"
+      ) }}
+
+      {% for error in form.email.errors %}
+        <span class="error-text">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+
+    <div class="field">
+      {{ form.phone.label }}
+      {{ form.phone(
+        placeholder="0244123456",
+        autocomplete="tel"
+      ) }}
+
+      {% for error in form.phone.errors %}
+        <span class="error-text">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+
+    <div class="field">
+      {{ form.delivery_location.label }}
+
+      {{ form.delivery_location(
+        placeholder="Where should we deliver your NFC cards?"
+      ) }}
+
+      {% for error in form.delivery_location.errors %}
+        <span class="error-text">{{ error }}</span>
+      {% endfor %}
+    </div>
+
+  </div>
+
+
+  <div class="panel enter enter-5">
+
+    <h3>5. Customise your cards</h3>
+
+    <div class="field">
+
+      {{ form.logo.label }}
+
+      {{ form.logo(
+        accept=".png,.jpg,.jpeg,.webp"
+      ) }}
+
+      {% for error in form.logo.errors %}
+        <span class="error-text">{{ error }}</span>
+      {% endfor %}
+
+      <span class="field-hint">
+        Upload your company logo, profile picture or other image you want
+        incorporated into the card design.
+      </span>
+
+    </div>
+
+
+    <div class="field">
+
+      {{ form.design_instructions.label }}
+
+      {{ form.design_instructions(
+        rows="5",
+        placeholder="Tell us your preferred colours, style, text, logo placement or other design instructions."
+      ) }}
+
+      {% for error in form.design_instructions.errors %}
+        <span class="error-text">{{ error }}</span>
+      {% endfor %}
+
+      <span class="field-hint">
+        Our design team will use these instructions when preparing your NFC card.
+      </span>
+
+    </div>
+
+
+    <div class="field" data-replacement-reason>
+
+      {{ form.replacement_reason.label }}
+
+      {{ form.replacement_reason() }}
+
+      {% for error in form.replacement_reason.errors %}
+        <span class="error-text">{{ error }}</span>
+      {% endfor %}
+
+    </div>
+
+  </div>
+
+
+  <div class="panel enter enter-6">
+
+    <h3>6. Payment method</h3>
+
+    <div class="channel-tabs">
+
+      <label class="channel-tab">
+
+        <input
+          type="radio"
+          name="{{ form.channel.name }}"
+          value="mobile_money"
+          {% if form.channel.data != "card" %}checked{% endif %}
+        >
+
+        <strong>Mobile money</strong>
+
+        <span>
+          MTN, Telecel or AirtelTigo
+        </span>
+
+      </label>
+
+
+      <label class="channel-tab">
+
+        <input
+          type="radio"
+          name="{{ form.channel.name }}"
+          value="card"
+          {% if form.channel.data == "card" %}checked{% endif %}
+        >
+
+        <strong>Card</strong>
+
+        <span>
+          Visa or Mastercard
+        </span>
+
+      </label>
+
+    </div>
+
+
+    <div class="momo-panel" data-momo-panel>
+
+      <div class="field">
+
+        {{ form.momo_provider.label }}
+
+        {{ form.momo_provider() }}
+
+        {% for error in form.momo_provider.errors %}
+          <span class="error-text">{{ error }}</span>
+        {% endfor %}
+
+      </div>
+
+
+      <div class="field">
+
+        {{ form.momo_phone.label }}
+
+        {{ form.momo_phone(
+          placeholder="0244123456",
+          autocomplete="tel"
+        ) }}
+
+        {% for error in form.momo_phone.errors %}
+          <span class="error-text">{{ error }}</span>
+        {% endfor %}
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="panel enter enter-7">
+
+    <h3>Order summary</h3>
+
+    <div class="order-summary">
+
+      <div class="summary-row">
+        <span>NFC cards</span>
+        <strong data-nfc-price>
+          {{ currency }} 200
+        </strong>
+      </div>
+
+
+      <div class="summary-row">
+        <span>Digital card</span>
+        <strong data-plan-price>
+          {{ currency }} 0
+        </strong>
+      </div>
+
+
+      <div class="summary-row summary-total">
+        <span>Total</span>
+        <strong data-total-price>
+          {{ currency }} 200
+        </strong>
+      </div>
+
+    </div>
+
+
+    <p class="field-hint">
+      Replacement orders receive a 30% discount on the NFC card portion.
+      The digital subscription price, if applicable, is unchanged.
+    </p>
+
+
+    {{ form.submit(
+      class="btn btn-primary btn-block btn-large press",
+      **{"data-busy-label": "Preparing payment…"}
+    ) }}
+
+  </div>
+
+</form>
+
+
+<style>
+
+.order-summary {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.summary-total {
+  border-bottom: 0;
+  padding-top: 18px;
+  font-size: 1.15rem;
+}
+
+.summary-total strong {
+  font-size: 1.4rem;
+}
+
+</style>
+
+
+<script>
+
+(function () {
+
+  const form = document.querySelector("form");
+
+  if (!form) {
+    return;
+  }
+
+  const currency = {{ currency|tojson }};
+
+  const plans = {{ plans|tojson }};
+
+  const nfcPrices = {
+    "1": 200,
+    "5": 750
+  };
+
+  const replacementDiscount = 0.30;
+
+
+  const nfcPriceElement =
+    form.querySelector("[data-nfc-price]");
+
+  const planPriceElement =
+    form.querySelector("[data-plan-price]");
+
+  const totalPriceElement =
+    form.querySelector("[data-total-price]");
+
+  const replacementReason =
+    form.querySelector("[data-replacement-reason]");
+
+
+  function selectedValue(name) {
+
+    const selected =
+      form.querySelector(
+        'input[name="' + name + '"]:checked'
+      );
+
+    return selected ? selected.value : "";
+
+  }
+
+
+  function updateSummary() {
+
+    const orderType =
+      selectedValue("order_type");
+
+    const quantity =
+      selectedValue("quantity") || "1";
+
+    const plan =
+      selectedValue("plan");
+
+
+    let nfcPrice =
+      nfcPrices[quantity] || 200;
+
+    let discount = 0;
+
+
+    if (orderType === "replacement") {
+
+      discount =
+        nfcPrice * replacementDiscount;
+
+      nfcPrice -= discount;
+
+    }
+
+
+    let digitalPrice = 0;
+
+    if (orderType === "digital_and_nfc" && plan && plans[plan]) {
+
+      digitalPrice =
+        plans[plan].amount_minor / 100;
+
+    }
+
+
+    const total =
+      nfcPrice + digitalPrice;
+
+
+    nfcPriceElement.textContent =
+      currency + " " + nfcPrice.toFixed(2);
+
+
+    planPriceElement.textContent =
+      currency + " " + digitalPrice.toFixed(2);
+
+
+    totalPriceElement.textContent =
+      currency + " " + total.toFixed(2);
+
+
+    if (replacementReason) {
+
+      replacementReason.style.display =
+        orderType === "replacement"
+          ? ""
+          : "none";
+
+    }
+
+  }
+
+
+  form.addEventListener(
+    "change",
+    updateSummary
+  );
+
+
+  updateSummary();
+
+})();
+
+</script>
+
+{% endblock %}

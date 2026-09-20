@@ -1,0 +1,965 @@
+{% extends "dashboard/_shell.html" %}
+
+{% block title %}
+{{ nfc_order.order_number }}
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .nfc-admin-page {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .nfc-hero {
+        background:
+            radial-gradient(circle at top right, rgba(111, 66, 193, .18), transparent 35%),
+            linear-gradient(135deg, #111827, #1f2937);
+        color: #fff;
+        border-radius: 18px;
+        padding: 28px;
+        margin-bottom: 24px;
+    }
+
+    .nfc-hero .eyebrow {
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        opacity: .65;
+        margin-bottom: 6px;
+    }
+
+    .nfc-hero h1 {
+        margin-bottom: 6px;
+        font-weight: 700;
+    }
+
+    .nfc-hero p {
+        margin-bottom: 0;
+        opacity: .75;
+    }
+
+    .nfc-card {
+        border: 0;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, .07);
+        overflow: hidden;
+    }
+
+    .nfc-card .card-body {
+        padding: 24px;
+    }
+
+    .section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .info-item {
+        padding: 12px 14px;
+        background: #f8fafc;
+        border-radius: 10px;
+        height: 100%;
+    }
+
+    .info-label {
+        font-size: .75rem;
+        color: #64748b;
+        margin-bottom: 4px;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #0f172a;
+        word-break: break-word;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 10px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .price-row:last-child {
+        border-bottom: 0;
+    }
+
+    .price-total {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .status-panel {
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 18px;
+    }
+
+    .payment-paid {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .payment-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .payment-failed {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .payment-other {
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+    .badge-status {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: .78rem;
+        font-weight: 700;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        margin-right: 7px;
+    }
+
+    .instructions {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px;
+        line-height: 1.7;
+        white-space: normal;
+    }
+
+    .quick-action {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+    }
+
+    .order-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    .meta-pill {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 7px 12px;
+        background: rgba(255,255,255,.10);
+        color: rgba(255,255,255,.9);
+        font-size: .8rem;
+    }
+
+    .digital-card-box {
+        background: linear-gradient(
+            135deg,
+            rgba(111, 66, 193, .08),
+            rgba(59, 130, 246, .08)
+        );
+        border: 1px solid rgba(111, 66, 193, .12);
+        border-radius: 14px;
+        padding: 18px;
+    }
+
+    @media (max-width: 767px) {
+        .nfc-hero {
+            padding: 22px;
+        }
+
+        .nfc-card .card-body {
+            padding: 18px;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4 nfc-admin-page">
+
+    <!-- Header -->
+    <div class="nfc-hero">
+
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+
+            <div>
+                <div class="eyebrow">
+                    NFC Order
+                </div>
+
+                <h1 class="h3">
+                    {{ nfc_order.order_number }}
+                </h1>
+
+                <p>
+                    Review payment, customer information, design requirements
+                    and NFC card fulfilment.
+                </p>
+
+                <div class="order-meta">
+
+                    <span class="meta-pill">
+                        {{ nfc_order.order_type
+                           .replace("_", " ")
+                           .title() }}
+                    </span>
+
+                    <span class="meta-pill">
+                        {{ nfc_order.quantity }} NFC
+                        {% if nfc_order.quantity == 1 %}
+                            Card
+                        {% else %}
+                            Cards
+                        {% endif %}
+                    </span>
+
+                    <span class="meta-pill">
+                        {{ currency }}
+                        {{ "%.2f"|format(nfc_order.total_amount) }}
+                    </span>
+
+                </div>
+            </div>
+
+            <div class="d-flex align-items-start">
+
+                <a
+                    href="{{ url_for('admin.nfc_orders') }}"
+                    class="btn btn-light"
+                >
+                    ← Back to Orders
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- Main column -->
+        <div class="col-lg-8">
+
+            <!-- Customer -->
+            <div class="card nfc-card mb-4">
+
+                <div class="card-body">
+
+                    <div class="section-title">
+                        Customer Information
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    Full name
+                                </div>
+
+                                <div class="info-value">
+                                    {{ nfc_order.full_name }}
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    Position / Job title
+                                </div>
+
+                                <div class="info-value">
+                                    {{ nfc_order.position or "Not provided" }}
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    Email
+                                </div>
+
+                                <div class="info-value">
+                                    <a href="mailto:{{ nfc_order.email }}">
+                                        {{ nfc_order.email }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    Phone
+                                </div>
+
+                                <div class="info-value">
+                                    <a href="tel:{{ nfc_order.phone }}">
+                                        {{ nfc_order.phone }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-12">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    Delivery location
+                                </div>
+
+                                <div class="info-value">
+                                    {{ nfc_order.delivery_location }}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Order details -->
+            <div class="card nfc-card mb-4">
+
+                <div class="card-body">
+
+                    <div class="section-title">
+                        Order Details
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <div class="info-item">
+
+                                <div class="info-label">
+                                    Order type
+                                </div>
+
+                                <div class="info-value">
+
+                                    {% if nfc_order.order_type == "digital_and_nfc" %}
+                                        Digital Card + NFC
+                                    {% elif nfc_order.order_type == "nfc_only" %}
+                                        NFC Cards Only
+                                    {% elif nfc_order.order_type == "replacement" %}
+                                        NFC Replacement
+                                    {% else %}
+                                        {{ nfc_order.order_type|replace("_", " ")|title }}
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <div class="info-item">
+
+                                <div class="info-label">
+                                    NFC quantity
+                                </div>
+
+                                <div class="info-value">
+                                    {{ nfc_order.quantity }}
+                                    {% if nfc_order.quantity == 1 %}
+                                        card
+                                    {% else %}
+                                        cards
+                                    {% endif %}
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <div class="info-item">
+
+                                <div class="info-label">
+                                    Digital card plan
+                                </div>
+
+                                <div class="info-value">
+
+                                    {% if nfc_order.digital_plan %}
+                                        {{ nfc_order.digital_plan|title }}
+                                    {% else %}
+                                        No digital plan
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <div class="info-item">
+
+                                <div class="info-label">
+                                    Order date
+                                </div>
+
+                                <div class="info-value">
+
+                                    {% if nfc_order.created_at %}
+                                        {{ nfc_order.created_at.strftime("%d %b %Y %H:%M") }}
+                                    {% else %}
+                                        Not available
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Digital card -->
+            {% if nfc_order.profile %}
+
+            <div class="card nfc-card mb-4">
+
+                <div class="card-body">
+
+                    <div class="section-title">
+                        Digital Card
+                    </div>
+
+                    <div class="digital-card-box">
+
+                        <div class="row align-items-center g-3">
+
+                            <div class="col">
+
+                                <div class="info-label">
+                                    Customer digital card
+                                </div>
+
+                                <div class="fw-bold">
+                                    {{ nfc_order.profile.full_name }}
+                                </div>
+
+                                {% if nfc_order.profile.slug %}
+
+                                    <div class="small text-muted mt-1">
+                                        /c/{{ nfc_order.profile.slug }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+                            {% if nfc_order.profile.slug %}
+
+                            <div class="col-auto">
+
+                                <a
+                                    href="{{ url_for(
+                                        'cards.show',
+                                        slug=nfc_order.profile.slug
+                                    ) }}"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="btn btn-outline-primary"
+                                >
+                                    View Card ↗
+                                </a>
+
+                            </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+            <!-- Pricing -->
+            <div class="card nfc-card mb-4">
+
+                <div class="card-body">
+
+                    <div class="section-title">
+                        Pricing Breakdown
+                    </div>
+
+                    <div class="price-row">
+                        <span class="text-muted">
+                            NFC cards
+                        </span>
+
+                        <strong>
+                            {{ currency }}
+                            {{ "%.2f"|format(nfc_order.nfc_price) }}
+                        </strong>
+                    </div>
+
+
+                    {% if nfc_order.discount > 0 %}
+
+                    <div class="price-row">
+
+                        <span class="text-muted">
+                            Replacement discount
+                        </span>
+
+                        <strong class="text-success">
+                            -{{ currency }}
+                            {{ "%.2f"|format(nfc_order.discount) }}
+                        </strong>
+
+                    </div>
+
+                    {% endif %}
+
+
+                    {% if nfc_order.digital_plan_price > 0 %}
+
+                    <div class="price-row">
+
+                        <span class="text-muted">
+                            {{ nfc_order.digital_plan|title }}
+                            digital card
+                        </span>
+
+                        <strong>
+                            {{ currency }}
+                            {{ "%.2f"|format(nfc_order.digital_plan_price) }}
+                        </strong>
+
+                    </div>
+
+                    {% endif %}
+
+
+                    <div class="price-row pt-3 mt-2">
+
+                        <span class="price-total">
+                            Total
+                        </span>
+
+                        <span class="price-total">
+                            {{ currency }}
+                            {{ "%.2f"|format(nfc_order.total_amount) }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Design -->
+            <div class="card nfc-card mb-4">
+
+                <div class="card-body">
+
+                    <div class="section-title">
+                        Design & Production
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <div class="info-label mb-2">
+                            Design instructions
+                        </div>
+
+                        <div class="instructions">
+
+                            {% if nfc_order.design_instructions %}
+
+                                {{ nfc_order.design_instructions
+                                    | e
+                                    | replace("\n", "<br>")
+                                    | safe
+                                }}
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    No special design instructions were provided.
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    {% if nfc_order.logo_filename %}
+
+                    <div class="mb-4">
+
+                        <div class="info-label mb-2">
+                            Uploaded logo / picture
+                        </div>
+
+                        <div class="info-item">
+
+                            <div class="info-value">
+                                {{ nfc_order.logo_filename }}
+                            </div>
+
+                            <div class="small text-muted mt-1">
+                                Uploaded design asset associated with this order.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {% endif %}
+
+
+                    {% if nfc_order.replacement_reason %}
+
+                    <div>
+
+                        <div class="info-label">
+                            Replacement reason
+                        </div>
+
+                        <div class="info-value">
+
+                            {{ nfc_order.replacement_reason
+                                .replace("_", " ")
+                                .title()
+                            }}
+
+                        </div>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+
+            <!-- Payment -->
+            <div class="card nfc-card mb-4">
+
+                <div class="card-body">
+
+                    <div class="section-title">
+                        Payment
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <div class="info-label mb-2">
+                            Payment status
+                        </div>
+
+
+                        {% if nfc_order.payment_status == "success" %}
+
+                            <span class="badge-status payment-paid">
+                                <span class="status-dot"></span>
+                                Paid
+                            </span>
+
+                        {% elif nfc_order.payment_status in ["pending", "abandoned"] %}
+
+                            <span class="badge-status payment-pending">
+                                <span class="status-dot"></span>
+                                {{ nfc_order.payment_status|title }}
+                            </span>
+
+                        {% elif nfc_order.payment_status == "failed" %}
+
+                            <span class="badge-status payment-failed">
+                                <span class="status-dot"></span>
+                                Failed
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge-status payment-other">
+                                <span class="status-dot"></span>
+                                {{ nfc_order.payment_status|title }}
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <div class="info-label">
+                            Payment reference
+                        </div>
+
+                        <div class="mt-1">
+
+                            {% if nfc_order.payment_reference %}
+
+                                <code class="small">
+                                    {{ nfc_order.payment_reference }}
+                                </code>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    None
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    {% if nfc_order.paid_at %}
+
+                    <div>
+
+                        <div class="info-label">
+                            Paid at
+                        </div>
+
+                        <div class="info-value">
+                            {{ nfc_order.paid_at.strftime("%d %b %Y %H:%M") }}
+                        </div>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- Production status -->
+            <div class="card nfc-card mb-4">
+
+                <div class="card-body">
+
+                    <div class="section-title">
+                        Fulfilment Status
+                    </div>
+
+                    <div class="status-panel">
+
+                        <div class="info-label mb-2">
+                            Current status
+                        </div>
+
+                        <div class="fw-bold mb-3">
+
+                            {{ nfc_order.status
+                                .replace("_", " ")
+                                .title()
+                            }}
+
+                        </div>
+
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'admin.update_nfc_status',
+                                order_id=nfc_order.id
+                            ) }}"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token() }}"
+                            >
+
+
+                            <label
+                                for="nfc-status"
+                                class="form-label small fw-semibold"
+                            >
+                                Change status
+                            </label>
+
+
+                            <select
+                                id="nfc-status"
+                                name="status"
+                                class="form-select mb-3"
+                            >
+
+                                {% for item in statuses %}
+
+                                    <option
+                                        value="{{ item }}"
+                                        {% if nfc_order.status == item %}
+                                            selected
+                                        {% endif %}
+                                    >
+                                        {{ item.replace("_", " ").title() }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary w-100"
+                            >
+                                Update Status
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Customer actions -->
+            <div class="card nfc-card mb-4">
+
+                <div class="card-body">
+
+                    <div class="section-title">
+                        Customer Actions
+                    </div>
+
+
+                    <div class="d-grid gap-2">
+
+                        <a
+                            href="mailto:{{ nfc_order.email }}"
+                            class="btn btn-outline-secondary quick-action justify-content-center"
+                        >
+                            Email Customer
+                        </a>
+
+
+                        <a
+                            href="tel:{{ nfc_order.phone }}"
+                            class="btn btn-outline-secondary quick-action justify-content-center"
+                        >
+                            Call Customer
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Internal order information -->
+            <div class="card nfc-card">
+
+                <div class="card-body">
+
+                    <div class="section-title">
+                        Order Information
+                    </div>
+
+
+                    <div class="small text-muted mb-2">
+                        Order ID
+                    </div>
+
+                    <div class="fw-semibold mb-3">
+                        #{{ nfc_order.id }}
+                    </div>
+
+
+                    <div class="small text-muted mb-2">
+                        Created
+                    </div>
+
+                    <div class="fw-semibold mb-3">
+
+                        {% if nfc_order.created_at %}
+                            {{ nfc_order.created_at.strftime("%d %b %Y %H:%M") }}
+                        {% else %}
+                            —
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="small text-muted mb-2">
+                        Last updated
+                    </div>
+
+                    <div class="fw-semibold">
+
+                        {% if nfc_order.updated_at %}
+                            {{ nfc_order.updated_at.strftime("%d %b %Y %H:%M") }}
+                        {% else %}
+                            —
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

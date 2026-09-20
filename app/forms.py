@@ -172,6 +172,162 @@ class CheckoutForm(FlaskForm):
             return False
         return True
 
+class NFCOrderForm(FlaskForm):
+    """Form for ordering physical NFC business cards."""
+
+    order_type = RadioField(
+        "Order type",
+        choices=[
+            ("digital_and_nfc", "Digital Card + NFC Cards"),
+            ("nfc_only", "NFC Cards Only"),
+            ("replacement", "Replace NFC Cards"),
+        ],
+        default="digital_and_nfc",
+        validators=[DataRequired()],
+    )
+
+    plan = SelectField(
+        "Digital card plan",
+        choices=[
+            ("starter", "Starter — GHS 100/year"),
+            ("professional", "Professional — GHS 200/year"),
+            ("business", "Business — GHS 500/year"),
+        ],
+        validators=[Optional()],
+    )
+
+    quantity = RadioField(
+        "Number of NFC cards",
+        choices=[
+            ("1", "1 NFC Card — GHS 200"),
+            ("5", "5 NFC Cards — GHS 750"),
+        ],
+        default="1",
+        validators=[DataRequired()],
+    )
+
+    full_name = StringField(
+        "Full name",
+        validators=[DataRequired(), Length(min=2, max=120)],
+    )
+
+    position = StringField(
+        "Position / Job title",
+        validators=[Optional(), Length(max=120)],
+    )
+
+    email = EmailField(
+        "Email address",
+        validators=[DataRequired(), Email(), Length(max=255)],
+    )
+
+    phone = TelField(
+        "Phone number",
+        validators=[DataRequired(), GhanaPhone()],
+    )
+
+    delivery_location = StringField(
+        "Delivery location",
+        validators=[DataRequired(), Length(min=3, max=255)],
+    )
+
+    logo = FileField(
+        "Logo or picture",
+        validators=[
+            Optional(),
+            FileAllowed(
+                ["png", "jpg", "jpeg", "webp"],
+                "Images only: PNG, JPG or WebP.",
+            ),
+        ],
+    )
+
+    design_instructions = TextAreaField(
+        "Design instructions",
+        validators=[
+            Optional(),
+            Length(
+                max=1000,
+                message="Keep design instructions under 1000 characters.",
+            ),
+        ],
+    )
+
+    replacement_reason = SelectField(
+        "Reason for replacement",
+        choices=[
+            ("", "Select a reason"),
+            ("lost", "Lost"),
+            ("damaged", "Damaged"),
+            ("change_of_design", "Change of design"),
+            ("nfc_not_working", "NFC not working"),
+            ("other", "Other"),
+        ],
+        validators=[Optional()],
+    )
+
+    channel = RadioField(
+        "How would you like to pay?",
+        choices=[
+            ("mobile_money", "Mobile money"),
+            ("card", "Card"),
+        ],
+        default="mobile_money",
+        validators=[DataRequired()],
+    )
+
+    momo_provider = SelectField(
+        "Network",
+        choices=[
+            ("mtn", "MTN MoMo"),
+            ("vod", "Telecel Cash"),
+            ("atl", "AirtelTigo Money"),
+        ],
+        validators=[Optional()],
+    )
+
+    momo_phone = TelField(
+        "Mobile money number",
+        validators=[Optional(), GhanaPhone()],
+    )
+
+    submit = SubmitField("Continue to payment")
+
+    def validate(self, extra_validators=None):
+        if not super().validate(extra_validators=extra_validators):
+            return False
+
+        order_type = self.order_type.data
+        plan = self.plan.data
+        replacement_reason = self.replacement_reason.data
+
+        if order_type == "digital_and_nfc" and not plan:
+            self.plan.errors.append("Select a digital card plan.")
+            return False
+
+        if order_type == "nfc_only" and plan:
+            self.plan.errors.append("A digital plan is not required for this order.")
+            return False
+
+        if order_type == "replacement" and not replacement_reason:
+            self.replacement_reason.errors.append(
+                "Select a reason for replacement."
+            )
+            return False
+
+        if order_type == "replacement" and not plan:
+            # Existing customers replacing NFC cards do not need
+            # to purchase a new digital subscription.
+            self.plan.data = ""
+
+        if self.channel.data == "mobile_money" and not self.momo_phone.data:
+            self.momo_phone.errors.append(
+                "Enter the number to charge."
+            )
+            return False
+
+        return True
+
 
 class OtpForm(FlaskForm):
     otp = StringField("One-time code", validators=[DataRequired(), Length(min=4, max=10)])
