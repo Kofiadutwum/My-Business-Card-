@@ -2,12 +2,33 @@
 
 from collections import OrderedDict
 from datetime import timedelta
+import os
+import uuid
 
-from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    url_for,
+)
+from werkzeug.utils import secure_filename
 from sqlalchemy import func
 
 from ..extensions import db
-from ..models import CardView, Payment, Profile, Subscription, User, utcnow
+from ..models import (
+    CardView,
+    GalleryImage,
+    Payment,
+    Profile,
+    Subscription,
+    User,
+    utcnow,
+)
 from ..utils.analytics import daily_series, monthly_totals
 from ..utils.decorators import admin_required
 
@@ -224,4 +245,139 @@ def finance():
         failed_count=len(failed),
         pending_count=len(pending),
         currency=current_app.config["CURRENCY"],
+    )
+
+# ---------------------------------------------------------------------------
+# Homepage gallery
+# ---------------------------------------------------------------------------
+
+ALLOWED_GALLERY_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
+
+
+def _gallery_upload_folder():
+    """Return the persistent folder used for homepage gallery images."""
+    folder = os.path.join(current_app.config["UPLOAD_FOLDER"], "gallery")
+    os.makedirs(folder, exist_ok=True)
+    return folder
+
+
+def _gallery_extension(filename):
+    """Return a safe lowercase image extension, or None."""
+    filename = secure_filename(filename or "")
+    if "." not in filename:
+        return None
+
+    extension = filename.rsplit(".", 1)[1].lower()
+
+    if extension not in ALLOWED_GALLERY_EXTENSIONS:
+        return None
+
+    return extension
+
+
+@bp.route("/gallery", methods=["GET", "POST"])
+@admin_required
+def gallery():
+    if request.method == "POST":
+        image = request.files.get("image")
+
+        if not image or not image.filename:
+            flash("Please select an image to upload.", "error")
+            return redirect(url_for("admin.gallery"))
+
+        extension = _gallery_extension(image.filename)
+
+        if not extension:
+            flash("Only JPG, JPEG, PNG and WebP images are allowed.", "error")
+            return redirect(url_for("admin.gallery"))
+
+        original_name = secure_filename(image.filename)
+        filename = f"{uuid.uuid4().hex}.{extension}"
+
+        upload_folder = _gallery_upload_folder()
+        image.save(os.path.join(upload_folder, filename))
+
+        try:
+            display_order = int(request.form.get("display_order", 0))
+        except (TypeError, ValueError):
+            display_order = 0
+
+        title = (request.form.get("title") or "").strip()
+        description = (request.form.get("description") or "").strip()
+
+        gallery_image = GalleryImage(
+            filename=filename,
+            title=title or None,
+            description=description or None,
+            display_order=display_order,
+            is_published=True,
+        )
+
+        db.session.add(gallery_image)
+        db.session.commit()
+
+        flash(f"{original_name} was added to the homepage gallery.", "success")
+        return redirect(url_for("admin.gallery"))
+
+    images = GalleryImage.query.order_by(
+        GalleryImage.display_order.asc(),
+        GalleryImage.id.asc(),
+    ).all()
+
+    return render_template(
+        "admin/gallery.html",
+        images=images,
+    )
+
+
+@bp.route("/gallery/<int:image_id>/toggle", methods=["POST"])
+@admin_required
+def toggle_gallery_image(image_id):
+    image = db.session.get(GalleryImage, image_id)
+
+    if image is None:
+        abort(404)
+
+    image.is_published = not image.is_published
+    db.session.commit()
+
+    state = "published" if image.is_published else "hidden"
+    flash(f"Gallery image is now {state}.", "info")
+
+    return redirect(url_for("admin.gallery"))
+
+
+@bp.route("/gallery/<int:image_id>/delete", methods=["POST"])
+@admin_required
+def delete_gallery_image(image_id):
+    image = db.session.get(GalleryImage, image_id)
+
+    if image is None:
+        abort(404)
+
+    upload_folder = _gallery_upload_folder()
+    file_path = os.path.join(upload_folder, image.filename)
+
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+
+    db.session.delete(image)
+    db.session.commit()
+
+    flash("Gallery image deleted.", "success")
+
+    return redirect(url_for("admin.gallery"))
+
+
+@bp.route("/gallery/image/<filename>")
+def gallery_image(filename):
+    """Serve a gallery image from the dedicated upload folder."""
+    filename = secure_filename(filename)
+
+    if not filename:
+        abort(404)
+
+    return send_from_directory(
+        _gallery_upload_folder(),
+        filename,
     )

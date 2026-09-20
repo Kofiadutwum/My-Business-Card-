@@ -1,25 +1,48 @@
 {% extends "base.html" %}
 
 {% block stylesheets %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+
 {% endblock %}
 
 {% block content %}
+
 <div class="wrap console">
+
   <nav class="side-nav" aria-label="Administration">
+
     <a href="{{ url_for('admin.dashboard') }}"
-       {% if request.endpoint == 'admin.dashboard' %}aria-current="page"{% endif %}>Overview</a>
+       {% if request.endpoint == 'admin.dashboard' %}aria-current="page"{% endif %}>
+      Overview
+    </a>
+
     <a href="{{ url_for('admin.clients') }}"
-       {% if request.endpoint in ('admin.clients', 'admin.client_detail') %}aria-current="page"{% endif %}>Clients</a>
+       {% if request.endpoint in ('admin.clients', 'admin.client_detail') %}aria-current="page"{% endif %}>
+      Clients
+    </a>
+
     <a href="{{ url_for('admin.finance') }}"
-       {% if request.endpoint == 'admin.finance' %}aria-current="page"{% endif %}>Finance</a>
+       {% if request.endpoint == 'admin.finance' %}aria-current="page"{% endif %}>
+      Finance
+    </a>
+
+    <a href="{{ url_for('admin.gallery') }}"
+       {% if request.endpoint in ('admin.gallery', 'admin.toggle_gallery_image', 'admin.delete_gallery_image') %}aria-current="page"{% endif %}>
+      Gallery
+    </a>
+
     <div class="side-nav-group">
       <a href="{{ url_for('dashboard.index') }}">My own card</a>
     </div>
+
   </nav>
+
   <div>
     {% block console %}{% endblock %}
   </div>
+
 </div>
+
 {% endblock %}

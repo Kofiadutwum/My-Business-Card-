@@ -4,52 +4,83 @@ from types import SimpleNamespace
 
 from flask import Blueprint, current_app, render_template
 
+from ..models import GalleryImage
+
+
 bp = Blueprint("main", __name__)
 
 
 def _demo_profile():
-    """A stand-in card for the hero.
+    """AD Smart Business Cards sample card shown on the homepage."""
 
-    Built in memory rather than seeded into the database so that the landing
-    page renders on a completely empty install, which is the first thing you
-    will see after cloning this.
-    """
+    support_phone = current_app.config.get(
+        "SUPPORT_PHONE",
+        "",
+    )
+
     return SimpleNamespace(
-        full_name="Ama Serwaa Boateng",
-        job_title="Procurement Lead",
-        organisation="Adinkra Logistics, Accra",
-        phone="+233244000000",
-        whatsapp="+233244000000",
-        email="ama@adinkralogistics.com",
-        website="https://adinkralogistics.com",
-        location="Accra",
-        bio="Freight and customs clearing across the Tema corridor.",
+        full_name="AD Smart Business Cards",
+        job_title="Digital Business Cards",
+        organisation="Ad graphics",
+        phone=support_phone,
+        whatsapp=support_phone,
+        email="adgraphics1@gmail.com",
+        website=current_app.config.get(
+            "SITE_URL",
+            "",
+        ),
+        location="Ghana",
+        bio="Smart digital business cards with QR and NFC sharing.",
         avatar_filename=None,
         accent="purple",
-        slug="ama-boateng",
-        initials="AB",
+        slug="ad-smart-business-cards",
+        initials="AD",
         social_links=[
-            SimpleNamespace(platform="linkedin", url="#", label="LinkedIn"),
-            SimpleNamespace(platform="instagram", url="#", label="Instagram"),
-            SimpleNamespace(platform="x", url="#", label="X"),
+            SimpleNamespace(
+                platform="instagram",
+                url="https://instagram.com/Adgraphics__",
+                label="Instagram",
+            ),
         ],
     )
 
 
 @bp.route("/")
 def index():
+    """
+    Public homepage.
+
+    Published gallery images are loaded automatically from the
+    database and passed to the homepage template.
+    """
+
+    gallery_images = (
+        GalleryImage.query
+        .filter_by(is_published=True)
+        .order_by(
+            GalleryImage.display_order.asc(),
+            GalleryImage.id.asc(),
+        )
+        .all()
+    )
+
     return render_template(
         "main/index.html",
         plans=current_app.config["PLANS"],
         currency=current_app.config["CURRENCY"],
+        usd_ghs_rate=current_app.config["USD_GHS_RATE"],
         demo_profile=_demo_profile(),
+        gallery_images=gallery_images,
     )
 
 
 @bp.route("/pricing")
 def pricing():
+    """Public pricing page."""
+
     return render_template(
         "main/pricing.html",
         plans=current_app.config["PLANS"],
         currency=current_app.config["CURRENCY"],
+        usd_ghs_rate=current_app.config["USD_GHS_RATE"],
     )

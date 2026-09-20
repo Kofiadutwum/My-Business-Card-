@@ -17,7 +17,9 @@
 
     <div class="panel enter enter-1">
       <h3>Who you are</h3>
+
       {{ field(form.full_name, placeholder="Ama Serwaa Boateng", autocomplete="name") }}
+
       <div class="field-pair">
         {{ field(form.job_title, placeholder="Procurement Lead") }}
         {{ field(form.organisation, placeholder="Adinkra Logistics") }}
@@ -26,25 +28,61 @@
       <div class="field {% if form.bio.errors %}field-error{% endif %}">
         {{ form.bio.label }}
         {{ form.bio(id="bio-field", placeholder="One line about what you do.") }}
-        {% for error in form.bio.errors %}<span class="error-text">{{ error }}</span>{% endfor %}
+        {% for error in form.bio.errors %}
+          <span class="error-text">{{ error }}</span>
+        {% endfor %}
         <span class="field-hint">
           <output class="char-count" data-counter-for="bio-field" data-max="280">0 / 280</output>
         </span>
       </div>
 
-      {{ field(form.avatar, hint="Square photo works best. PNG, JPG or WebP, up to 3 MB.") }}
+      <!-- Business Logo / Profile Image -->
+      <div class="field {% if form.avatar.errors %}field-error{% endif %}">
+        <label for="{{ form.avatar.id }}">Business Logo / Profile Image</label>
+
+        <div class="avatar-upload">
+          <div class="avatar-preview" id="avatar-preview">
+            <span id="avatar-placeholder">No image selected</span>
+            <img
+              id="avatar-preview-image"
+              src=""
+              alt="Selected business logo or profile image"
+              hidden
+            >
+          </div>
+
+          <div class="avatar-upload-controls">
+            {{ form.avatar(
+                id="avatar-upload",
+                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+            ) }}
+
+            <span class="field-hint">
+              Upload your business logo or profile picture.
+              Square images work best. PNG, JPG or WebP, up to 3 MB.
+            </span>
+          </div>
+        </div>
+
+        {% for error in form.avatar.errors %}
+          <span class="error-text">{{ error }}</span>
+        {% endfor %}
+      </div>
     </div>
 
     <div class="panel enter enter-2">
       <h3>How people reach you</h3>
+
       <div class="field-pair">
         {{ field(form.phone, placeholder="0244123456", autocomplete="tel") }}
         {{ field(form.whatsapp, placeholder="0244123456") }}
       </div>
+
       <div class="field-pair">
         {{ field(form.email, placeholder="you@example.com", autocomplete="email") }}
         {{ field(form.website, placeholder="https://example.com") }}
       </div>
+
       {{ field(form.location, placeholder="Cape Coast") }}
     </div>
 
@@ -53,19 +91,31 @@
 
       <div class="field {% if form.slug.errors %}field-error{% endif %}">
         {{ form.slug.label }}
+
         <div class="slug-field">
-          <span class="slug-prefix">{{ config.SITE_URL|replace('https://', '')|replace('http://', '') }}/c/</span>
+          <span class="slug-prefix">
+            {{ config.SITE_URL|replace('https://', '')|replace('http://', '') }}/c/
+          </span>
           {{ form.slug(placeholder="ama-boateng") }}
         </div>
-        {% for error in form.slug.errors %}<span class="error-text">{{ error }}</span>{% endfor %}
+
+        {% for error in form.slug.errors %}
+          <span class="error-text">{{ error }}</span>
+        {% endfor %}
+
         <span class="field-hint">
-          Changing this breaks any QR code already printed with the old link. Choose once, keep it.
+          Changing this breaks any QR code already printed with the old link.
+          Choose once, keep it.
         </span>
       </div>
 
       {{ field(form.accent) }}
       {{ checkbox(form.is_published) }}
-      {{ form.submit(class="btn btn-primary btn-large press", **{"data-busy-label": "Saving…"}) }}
+
+      {{ form.submit(
+          class="btn btn-primary btn-large press",
+          **{"data-busy-label": "Saving…"}
+      ) }}
     </div>
   </form>
 
@@ -74,4 +124,50 @@
     <p class="preview-label">Live preview</p>
   </aside>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const input = document.getElementById("avatar-upload");
+  const previewImage = document.getElementById("avatar-preview-image");
+  const placeholder = document.getElementById("avatar-placeholder");
+
+  if (!input) return;
+
+  input.addEventListener("change", function () {
+    const file = this.files && this.files[0];
+
+    if (!file) {
+      previewImage.hidden = true;
+      previewImage.removeAttribute("src");
+      placeholder.hidden = false;
+      placeholder.textContent = "No image selected";
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      previewImage.hidden = true;
+      previewImage.removeAttribute("src");
+      placeholder.hidden = false;
+      placeholder.textContent = "Please select JPG, PNG or WebP";
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+      previewImage.src = event.target.result;
+      previewImage.hidden = false;
+      placeholder.hidden = true;
+    };
+
+    reader.readAsDataURL(file);
+  });
+});
+</script>
 {% endblock %}

@@ -384,3 +384,28 @@ class Lead(db.Model):
 
     def __repr__(self):
         return f"<Lead {self.name} -> {self.profile_id}>"
+
+class GalleryImage(db.Model):
+    """An image displayed in the public homepage gallery."""
+
+    __tablename__ = "gallery_images"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    filename = db.Column(db.String(255), nullable=False)
+    title = db.Column(db.String(160))
+    description = db.Column(db.Text)
+
+    display_order = db.Column(db.Integer, default=0, nullable=False)
+    is_published = db.Column(db.Boolean, default=True, nullable=False)
+
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
+    updated_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        onupdate=utcnow,
+        nullable=False,
+    )
+
+    def __repr__(self):
+        return f"<GalleryImage {self.filename}>"

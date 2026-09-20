@@ -1,120 +1,839 @@
 {% extends "base.html" %}
+
 {% from "_macros.html" import contact_card %}
 
 {% block title %}{{ config.SITE_NAME }} — one contact card, shared in a tap{% endblock %}
 
 {% block content %}
+
+<!-- =========================================================
+     HERO
+     ========================================================= -->
+
 <section class="hero">
+
   <div class="hero-glow drifting" aria-hidden="true"></div>
+
   <div class="wrap hero-grid">
+
+```
+<div>
+
+  <h1 class="hero-title enter enter-1">
+    Your contact details, saved in one tap.
+  </h1>
+
+  <p class="hero-lede enter enter-2">
+    Build a card once. Share it with a link, a QR code or an NFC tag.
+    Whoever receives it saves your name, number and social handles
+    straight to their phone — no app to install on their side.
+  </p>
+
+  <div class="hero-actions enter enter-3">
+
+    <a
+      class="btn btn-primary btn-large press"
+      href="{{ url_for('auth.register') }}"
+    >
+      Build my card
+    </a>
+
+    <a
+      class="btn btn-ghost btn-large press"
+      href="{{ url_for('main.pricing') }}"
+    >
+      See pricing
+    </a>
+
+    <a
+      class="btn btn-ghost btn-large press"
+      href="https://wa.me/233{{ config.SUPPORT_PHONE[1:] }}"
+      rel="noopener"
+    >
+      Talk to us
+    </a>
+
+  </div>
+
+
+  <div class="hero-proof enter enter-4">
+
     <div>
-      <h1 class="hero-title enter enter-1">Your contact details, saved in one tap.</h1>
-      <p class="hero-lede enter enter-2">
-        Build a card once. Share it with a link, a QR code or an NFC tag. Whoever
-        receives it saves your name, number and social handles straight to their
-        phone — no app to install on their side.
-      </p>
-      <div class="hero-actions enter enter-3">
-        <a class="btn btn-primary btn-large press" href="{{ url_for('auth.register') }}">Build my card</a>
-        <a class="btn btn-ghost btn-large press" href="{{ url_for('main.pricing') }}">See pricing</a>
-        <a class="btn btn-ghost btn-large press"
-           href="https://wa.me/233{{ config.SUPPORT_PHONE[1:] }}" rel="noopener">Talk to us</a>
-      </div>
-      <div class="hero-proof enter enter-4">
-        <div>
-          <strong class="proof-figure">One tap</strong>
-          <span class="proof-label">to save your details</span>
-        </div>
-        <div>
-          <strong class="proof-figure">MoMo</strong>
-          <span class="proof-label">or card payment</span>
-        </div>
-        <div>
-          <strong class="proof-figure">Works offline</strong>
-          <span class="proof-label">once the card is saved</span>
-        </div>
-      </div>
+      <strong class="proof-figure">One tap</strong>
+      <span class="proof-label">to save your details</span>
     </div>
 
     <div>
-      {% set demo = namespace() %}
-      {{ contact_card(demo_profile, vcf_url=None, interactive=true) }}
-      <p class="preview-label">Move your pointer across the card.</p>
+      <strong class="proof-figure">MoMo</strong>
+      <span class="proof-label">or card payment</span>
     </div>
+
+    <div>
+      <strong class="proof-figure">Works offline</strong>
+      <span class="proof-label">once the card is saved</span>
+    </div>
+
   </div>
+
+</div>
+
+
+<div>
+
+  {% set demo = namespace() %}
+
+  {{ contact_card(
+    demo_profile,
+    vcf_url=None,
+    interactive=true
+  ) }}
+
+  <p class="preview-label">
+    Move your pointer across the card.
+  </p>
+
+</div>
+```
+
+  </div>
+
 </section>
 
+<!-- =========================================================
+     THREE STEPS
+     ========================================================= -->
+
 <section class="section">
+
   <div class="wrap">
-    <div class="section-head reveal">
-      <h2>Three steps, then you are sharing</h2>
-      <p>No design work, no printer, no reorder when your number changes.</p>
-    </div>
 
-    <div class="steps">
-      <div class="step reveal">
-        <h3>Enter your details</h3>
-        <p>Name, job title, organisation, phone, email and as many social handles as your plan allows.</p>
-      </div>
-      <div class="step reveal reveal-2">
-        <h3>Choose a plan</h3>
-        <p>Pay by MTN MoMo, Telecel Cash, AirtelTigo Money or card. One payment covers a full year.</p>
-      </div>
-      <div class="step reveal reveal-3">
-        <h3>Share the card</h3>
-        <p>Send the link, show the QR code, or write it to an NFC tag. Update it any time — the link never changes.</p>
-      </div>
-    </div>
+```
+<div class="section-head reveal">
+
+  <h2>Three steps, then you are sharing</h2>
+
+  <p>
+    No design work, no printer, no reorder when your number changes.
+  </p>
+
+</div>
+
+
+<div class="steps">
+
+  <div class="step reveal">
+
+    <h3>Enter your details</h3>
+
+    <p>
+      Name, job title, organisation, phone, email and as many social
+      handles as your plan allows.
+    </p>
+
   </div>
+
+
+  <div class="step reveal reveal-2">
+
+    <h3>Choose a plan</h3>
+
+    <p>
+      Pay by MTN MoMo, Telecel Cash, AirtelTigo Money or card.
+      One payment covers a full year.
+    </p>
+
+  </div>
+
+
+  <div class="step reveal reveal-3">
+
+    <h3>Share the card</h3>
+
+    <p>
+      Send the link, show the QR code, or write it to an NFC tag.
+      Update it any time — the link never changes.
+    </p>
+
+  </div>
+
+</div>
+```
+
+  </div>
+
 </section>
 
+<!-- =========================================================
+     WHY DIGITAL CARD
+     ========================================================= -->
+
 <section class="section">
+
   <div class="wrap split">
-    <div class="reveal">
-      <h2>Why a card beats a saved screenshot</h2>
-      <p>
-        A screenshot of your details sits in someone's gallery and is never
-        found again. A card downloads a proper contact file — the kind the phone
-        already understands — so your name appears when you call, and your
-        details are searchable in their contacts from that moment on.
-      </p>
-      <p>
-        When your number or your job changes, the card changes. The person who
-        saved it last year still reaches you.
-      </p>
-    </div>
 
-    <div class="panel reveal reveal-2">
-      <h3>Built for how business is done here</h3>
-      <p class="text-small muted">
-        Payment by mobile money as the first option, not an afterthought.
-        Ghanaian phone number formats accepted as people actually write them.
-        Pages kept light enough to open on a slow connection.
-      </p>
-      <a class="btn btn-dark press" href="{{ url_for('auth.register') }}">Start free</a>
-    </div>
+```
+<div class="reveal">
+
+  <h2>Why a card beats a saved screenshot</h2>
+
+  <p>
+    A screenshot of your details sits in someone's gallery and is never
+    found again. A card downloads a proper contact file — the kind the
+    phone already understands — so your name appears when you call,
+    and your details are searchable in their contacts from that moment on.
+  </p>
+
+  <p>
+    When your number or your job changes, the card changes.
+    The person who saved it last year still reaches you.
+  </p>
+
+</div>
+
+
+<div class="panel reveal reveal-2">
+
+  <h3>Built for how business is done here</h3>
+
+  <p class="text-small muted">
+    Payment by mobile money as the first option, not an afterthought.
+    Ghanaian phone number formats accepted as people actually write them.
+    Pages kept light enough to open on a slow connection.
+  </p>
+
+  <a
+    class="btn btn-dark press"
+    href="{{ url_for('auth.register') }}"
+  >
+    Start free
+  </a>
+
+</div>
+```
+
   </div>
+
 </section>
+
+<!-- =========================================================
+     HOMEPAGE GALLERY
+     Automatically displays published admin uploads
+     ========================================================= -->
+
+{% if gallery_images and gallery_images|length > 0 %}
+
+<section class="section gallery-section">
+
+  <div class="wrap">
+
+```
+<div class="section-head reveal">
+
+  <h2>See AD Smart Business Cards in action</h2>
+
+  <p>
+    Explore how our digital business cards help you share your
+    professional identity quickly and professionally.
+  </p>
+
+</div>
+
+
+<div
+  class="gallery-slider reveal"
+  data-gallery
+  aria-label="AD Smart Business Cards gallery"
+>
+
+  <div class="gallery-track">
+
+    {% for image in gallery_images %}
+
+    <article
+      class="gallery-slide {% if loop.first %}is-active{% endif %}"
+      data-gallery-slide="{{ loop.index0 }}"
+      aria-hidden="{% if loop.first %}false{% else %}true{% endif %}"
+    >
+
+      <div class="gallery-media">
+
+        <img
+          src="{{ url_for('admin.gallery_image', filename=image.filename) }}"
+          alt="{{ image.title or 'AD Smart Business Cards gallery image' }}"
+          loading="{% if loop.first %}eager{% else %}lazy{% endif %}"
+        >
+
+      </div>
+
+
+      {% if image.title or image.description %}
+
+      <div class="gallery-caption">
+
+        {% if image.title %}
+
+        <h3>{{ image.title }}</h3>
+
+        {% endif %}
+
+
+        {% if image.description %}
+
+        <p>{{ image.description }}</p>
+
+        {% endif %}
+
+      </div>
+
+      {% endif %}
+
+    </article>
+
+    {% endfor %}
+
+  </div>
+
+
+  {% if gallery_images|length > 1 %}
+
+  <button
+    type="button"
+    class="gallery-control gallery-prev"
+    data-gallery-prev
+    aria-label="Previous gallery image"
+  >
+    &#10094;
+  </button>
+
+
+  <button
+    type="button"
+    class="gallery-control gallery-next"
+    data-gallery-next
+    aria-label="Next gallery image"
+  >
+    &#10095;
+  </button>
+
+
+  <div
+    class="gallery-dots"
+    role="tablist"
+    aria-label="Gallery images"
+  >
+
+    {% for image in gallery_images %}
+
+    <button
+      type="button"
+      class="gallery-dot {% if loop.first %}is-active{% endif %}"
+      data-gallery-dot="{{ loop.index0 }}"
+      role="tab"
+      aria-label="Show image {{ loop.index }}"
+      aria-selected="{% if loop.first %}true{% else %}false{% endif %}"
+    ></button>
+
+    {% endfor %}
+
+  </div>
+
+  {% endif %}
+
+</div>
+```
+
+  </div>
+
+</section>
+
+{% endif %}
+
+<!-- =========================================================
+     PLANS
+     ========================================================= -->
 
 <section class="section">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <h2>Plans</h2>
-      <p>Billed once a year. The card stops resolving when a plan lapses, and comes straight back when it is renewed.</p>
-    </div>
 
-    <div class="plan-grid">
-      {% for key, plan in plans.items() %}
-        <div class="panel lift reveal reveal-{{ loop.index }}">
-          <h3>{{ plan.label }}</h3>
-          <p class="stat-value">{{ currency }} {{ '%.0f'|format(plan.amount_minor / 100) }}</p>
-          <p class="text-small muted">per year</p>
-          <p class="text-small">{{ plan.blurb }}</p>
-          <a class="btn {% if key == 'professional' %}btn-primary{% else %}btn-ghost{% endif %} btn-block press"
-             href="{{ url_for('auth.register') }}">Choose {{ plan.label }}</a>
-        </div>
-      {% endfor %}
-    </div>
+  <div class="wrap">
+
+```
+<div class="section-head reveal">
+
+  <h2>Plans</h2>
+
+  <p>
+    Billed once a year. The card stops resolving when a plan lapses,
+    and comes straight back when it is renewed.
+  </p>
+
+</div>
+
+
+<div class="plan-grid">
+
+  {% for key, plan in plans.items() %}
+
+  <div class="panel lift reveal reveal-{{ loop.index }}">
+
+    <h3>
+      {{ plan.label }}
+    </h3>
+
+
+    <p class="stat-value">
+    {{ currency }} {{ '%.0f'|format(plan.amount_minor / 100) }}
+    </p>
+
+    <p class="text-small muted">
+      ≈ US$ {{ '%.2f'|format((plan.amount_minor / 100) * usd_ghs_rate) }}
+    </p>
+
+
+    <p class="text-small muted">
+      per year
+    </p>
+
+
+    <p class="text-small">
+      {{ plan.blurb }}
+    </p>
+
+
+    <a
+      class="btn {% if key == 'professional' %}btn-primary{% else %}btn-ghost{% endif %} btn-block press"
+      href="{{ url_for('auth.register') }}"
+    >
+      Choose {{ plan.label }}
+    </a>
+
   </div>
+
+  {% endfor %}
+
+</div>
+```
+
+  </div>
+
 </section>
+
+<!-- =========================================================
+     GALLERY STYLES
+     ========================================================= -->
+
+<style>
+
+.gallery-section {
+  overflow: hidden;
+}
+
+
+.gallery-slider {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+
+.gallery-track {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #111;
+}
+
+
+.gallery-slide {
+  display: none;
+  position: relative;
+}
+
+
+.gallery-slide.is-active {
+  display: block;
+  animation: galleryFade 0.6s ease;
+}
+
+
+.gallery-media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+
+.gallery-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+.gallery-caption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  padding: 60px 32px 28px;
+
+  color: #fff;
+
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.82),
+    rgba(0, 0, 0, 0)
+  );
+}
+
+
+.gallery-caption h3 {
+  margin: 0 0 6px;
+  color: #fff;
+}
+
+
+.gallery-caption p {
+  max-width: 700px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+
+.gallery-control {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+
+  width: 46px;
+  height: 46px;
+
+  border: 0;
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+
+  transform: translateY(-50%);
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+
+.gallery-control:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+
+.gallery-control:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+
+.gallery-prev {
+  left: 18px;
+}
+
+
+.gallery-next {
+  right: 18px;
+}
+
+
+.gallery-dots {
+  position: absolute;
+
+  right: 0;
+  bottom: 18px;
+  left: 0;
+
+  z-index: 3;
+
+  display: flex;
+  justify-content: center;
+
+  gap: 8px;
+}
+
+
+.gallery-dot {
+  width: 9px;
+  height: 9px;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  background: rgba(255, 255, 255, 0.5);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+
+.gallery-dot.is-active {
+  transform: scale(1.35);
+  background: #fff;
+}
+
+
+@keyframes galleryFade {
+
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .gallery-track {
+    border-radius: 16px;
+  }
+
+
+  .gallery-media {
+    aspect-ratio: 4 / 3;
+  }
+
+
+  .gallery-caption {
+    padding: 50px 18px 20px;
+  }
+
+
+  .gallery-caption h3 {
+    font-size: 1.05rem;
+  }
+
+
+  .gallery-caption p {
+    font-size: 0.9rem;
+  }
+
+
+  .gallery-control {
+    width: 38px;
+    height: 38px;
+  }
+
+
+  .gallery-prev {
+    left: 10px;
+  }
+
+
+  .gallery-next {
+    right: 10px;
+  }
+
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+  .gallery-slide.is-active {
+    animation: none;
+  }
+
+}
+
+</style>
+
+<!-- =========================================================
+     GALLERY JAVASCRIPT
+     ========================================================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const slider = document.querySelector("[data-gallery]");
+
+  if (!slider) {
+    return;
+  }
+
+
+  const slides =
+    slider.querySelectorAll("[data-gallery-slide]");
+
+
+  const dots =
+    slider.querySelectorAll("[data-gallery-dot]");
+
+
+  const previous =
+    slider.querySelector("[data-gallery-prev]");
+
+
+  const next =
+    slider.querySelector("[data-gallery-next]");
+
+
+  if (slides.length <= 1) {
+    return;
+  }
+
+
+  let current = 0;
+
+  let timer = null;
+
+
+  function showSlide(index) {
+
+    current =
+      (index + slides.length) % slides.length;
+
+
+    slides.forEach(function (slide, i) {
+
+      const active = i === current;
+
+
+      slide.classList.toggle(
+        "is-active",
+        active
+      );
+
+
+      slide.setAttribute(
+        "aria-hidden",
+        active ? "false" : "true"
+      );
+
+    });
+
+
+    dots.forEach(function (dot, i) {
+
+      const active = i === current;
+
+
+      dot.classList.toggle(
+        "is-active",
+        active
+      );
+
+
+      dot.setAttribute(
+        "aria-selected",
+        active ? "true" : "false"
+      );
+
+    });
+
+  }
+
+
+  function startAutoSlide() {
+
+    clearInterval(timer);
+
+
+    timer = setInterval(function () {
+
+      showSlide(current + 1);
+
+    }, 5000);
+
+  }
+
+
+  if (previous) {
+
+    previous.addEventListener(
+      "click",
+      function () {
+
+        showSlide(current - 1);
+
+        startAutoSlide();
+
+      }
+    );
+
+  }
+
+
+  if (next) {
+
+    next.addEventListener(
+      "click",
+      function () {
+
+        showSlide(current + 1);
+
+        startAutoSlide();
+
+      }
+    );
+
+  }
+
+
+  dots.forEach(function (dot) {
+
+    dot.addEventListener(
+      "click",
+      function () {
+
+        showSlide(
+          Number(dot.dataset.galleryDot)
+        );
+
+        startAutoSlide();
+
+      }
+    );
+
+  });
+
+
+  slider.addEventListener(
+    "mouseenter",
+    function () {
+
+      clearInterval(timer);
+
+    }
+  );
+
+
+  slider.addEventListener(
+    "mouseleave",
+    function () {
+
+      startAutoSlide();
+
+    }
+  );
+
+
+  showSlide(0);
+
+  startAutoSlide();
+
+});
+
+</script>
+
 {% endblock %}

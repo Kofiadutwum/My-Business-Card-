@@ -36,26 +36,28 @@ class BaseConfig:
     PLANS = {
         "starter": {
             "label": "Starter",
-            "amount_minor": 5000,
+            "amount_minor": 10000,
             "months": 12,
             "max_social_links": 5,
             "blurb": "One card, QR sharing, five social links.",
         },
         "professional": {
             "label": "Professional",
-            "amount_minor": 10000,
+            "amount_minor": 20000,
             "months": 12,
             "max_social_links": 12,
             "blurb": "Custom link, twelve social links, scan analytics.",
         },
         "business": {
             "label": "Business",
-            "amount_minor": 25000,
+            "amount_minor": 50000,
             "months": 12,
             "max_social_links": 25,
             "blurb": "Everything in Professional, plus team billing.",
         },
     }
+    USD_GHS_RATE = float(os.getenv("USD_GHS_RATE", "0.0869909"))
+
     GRACE_PERIOD_DAYS = int(os.environ.get("GRACE_PERIOD_DAYS", 7))
     RENEWAL_NOTICE_DAYS = int(os.environ.get("RENEWAL_NOTICE_DAYS", 30))
 
