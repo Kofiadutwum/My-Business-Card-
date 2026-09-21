@@ -8,23 +8,57 @@
   <div class="wrap wrap-narrow">
     <div class="panel enter">
       <h1>Create your account</h1>
+
       <p class="muted text-small">
         Build the card first. Choose a plan when you are ready to publish it.
       </p>
 
       <form method="post" novalidate data-guard>
         {{ form.hidden_tag() }}
-        {{ field(form.full_name, placeholder="Ama Serwaa Boateng", autocomplete="name") }}
-        {{ field(form.email, placeholder="you@example.com", autocomplete="email") }}
-        {{ field(form.password, hint="At least 8 characters.", autocomplete="new-password") }}
-        {{ field(form.confirm, autocomplete="new-password") }}
+
+        {{ field(
+          form.full_name,
+          placeholder="Ama Serwaa Boateng",
+          autocomplete="name"
+        ) }}
+
+        {{ field(
+          form.phone,
+          placeholder="0244123456",
+          autocomplete="tel",
+          hint="Use a Ghanaian mobile number."
+        ) }}
+
+        {{ field(
+          form.email,
+          placeholder="you@example.com",
+          autocomplete="email"
+        ) }}
+
+        {{ field(
+          form.password,
+          hint="At least 8 characters.",
+          autocomplete="new-password"
+        ) }}
+
+        {{ field(
+          form.confirm,
+          autocomplete="new-password"
+        ) }}
+
         {{ checkbox(form.accept_terms) }}
-        {{ form.submit(class="btn btn-primary btn-block btn-large press", **{"data-busy-label": "Creating…"}) }}
+
+        {{ form.submit(
+          class="btn btn-primary btn-block btn-large press",
+          **{"data-busy-label": "Creating…"}
+        ) }}
       </form>
 
       <hr>
+
       <p class="text-small muted">
-        Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a>.
+        Already registered?
+        <a href="{{ url_for('auth.login') }}">Sign in</a>.
       </p>
     </div>
   </div>

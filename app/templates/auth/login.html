@@ -8,19 +8,55 @@
   <div class="wrap wrap-narrow">
     <div class="panel enter">
       <h1>Sign in</h1>
-      <p class="muted text-small">Reach your card, your links and your plan.</p>
+
+      <p class="muted text-small">
+        Reach your card, your links and your plan.
+      </p>
 
       <form method="post" novalidate data-guard>
         {{ form.hidden_tag() }}
-        {{ field(form.email, placeholder="you@example.com", autocomplete="email") }}
-        {{ field(form.password, autocomplete="current-password") }}
+
+        {{ field(
+          form.email,
+          placeholder="you@example.com",
+          autocomplete="email"
+        ) }}
+
+        {{ field(
+          form.password,
+          autocomplete="current-password"
+        ) }}
+
+        <p class="text-small">
+          <a href="{{ url_for('auth.forgot_password') }}">
+            Forgot your password?
+          </a>
+        </p>
+
         {{ checkbox(form.remember) }}
-        {{ form.submit(class="btn btn-primary btn-block btn-large press", **{"data-busy-label": "Signing in…"}) }}
+
+        {{ form.submit(
+          class="btn btn-primary btn-block btn-large press",
+          **{"data-busy-label": "Signing in…"}
+        ) }}
       </form>
 
+      <div class="auth-divider">
+        <span>OR</span>
+      </div>
+
+      <a
+        href="{{ url_for('auth.google_login') }}"
+        class="btn btn-block btn-large google-btn"
+      >
+        Continue with Google
+      </a>
+
       <hr>
+
       <p class="text-small muted">
-        No account yet? <a href="{{ url_for('auth.register') }}">Build a card</a>.
+        No account yet?
+        <a href="{{ url_for('auth.register') }}">Build a card</a>.
       </p>
     </div>
   </div>

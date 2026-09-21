@@ -57,6 +57,29 @@ class User(UserMixin, db.Model):
         nullable=False,
     )
 
+    # Phone number associated with the user's account.
+    # This is separate from Profile.phone because it is used for
+    # account recovery and authentication-related purposes.
+    phone = db.Column(
+        db.String(32),
+        unique=True,
+    )
+
+    # Google's stable account identifier returned in the verified
+    # Google ID token. Do not use the Google email as the identifier
+    # because the email address can change.
+    google_sub = db.Column(
+        db.String(255),
+        unique=True,
+        index=True,
+    )
+
+    # Records the last successful email change. The account-management
+    # layer will enforce the 90-day waiting period.
+    email_changed_at = db.Column(
+        db.DateTime,
+    )
+
     is_admin = db.Column(
         db.Boolean,
         default=False,
@@ -100,6 +123,13 @@ class User(UserMixin, db.Model):
         order_by="Payment.created_at.desc()",
     )
 
+    password_reset_otps = db.relationship(
+        "PasswordResetOTP",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        order_by="PasswordResetOTP.created_at.desc()",
+    )
+
     def set_password(self, raw):
         self.password_hash = generate_password_hash(raw)
 
@@ -140,6 +170,30 @@ class User(UserMixin, db.Model):
 
         return delta.days
 
+    @property
+    def can_change_email(self):
+        """Whether the user has passed the 90-day email-change window."""
+        if not self.email_changed_at:
+            return True
+
+        next_change = (
+            _aware(self.email_changed_at)
+            + timedelta(days=90)
+        )
+
+        return utcnow() >= next_change
+
+    @property
+    def next_email_change_at(self):
+        """Return the next permitted email-change date/time."""
+        if not self.email_changed_at:
+            return None
+
+        return (
+            _aware(self.email_changed_at)
+            + timedelta(days=90)
+        )
+
     def __repr__(self):
         return f"<User {self.email}>"
 
@@ -150,6 +204,123 @@ def load_user(user_id):
         User,
         int(user_id),
     )
+
+
+class PasswordResetOTP(db.Model):
+    """One-time password-reset/recovery code.
+
+    The actual OTP is never stored in the database.
+    Only a password hash of the OTP is stored.
+    """
+
+    __tablename__ = "password_reset_otps"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    phone = db.Column(
+        db.String(32),
+        nullable=False,
+        index=True,
+    )
+
+    otp_hash = db.Column(
+        db.String(255),
+        nullable=False,
+    )
+
+    expires_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        index=True,
+    )
+
+    attempts = db.Column(
+        db.Integer,
+        default=0,
+        nullable=False,
+    )
+
+    used_at = db.Column(
+        db.DateTime,
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=utcnow,
+        nullable=False,
+        index=True,
+    )
+
+    user = db.relationship(
+        "User",
+        back_populates="password_reset_otps",
+    )
+
+    def set_otp(self, otp):
+        """Hash and store an OTP without storing the raw code."""
+        self.otp_hash = generate_password_hash(
+            str(otp)
+        )
+
+    def check_otp(self, otp):
+        """Verify an OTP and increment the attempt counter."""
+        if self.used_at:
+            return False
+
+        if self.is_expired:
+            return False
+
+        self.attempts += 1
+
+        if self.attempts > 5:
+            return False
+
+        return check_password_hash(
+            self.otp_hash,
+            str(otp),
+        )
+
+    @property
+    def is_expired(self):
+        return (
+            utcnow()
+            >= _aware(self.expires_at)
+        )
+
+    @property
+    def is_used(self):
+        return self.used_at is not None
+
+    @property
+    def is_valid(self):
+        return (
+            not self.is_used
+            and not self.is_expired
+            and self.attempts < 5
+        )
+
+    def mark_used(self):
+        self.used_at = utcnow()
+
+    def __repr__(self):
+        return (
+            f"<PasswordResetOTP "
+            f"user={self.user_id} "
+            f"phone={self.phone}>"
+        )
 
 
 class Profile(db.Model):

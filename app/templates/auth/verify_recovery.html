@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field %}
+
+{% block title %}Reset your password — {{ config.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="wrap wrap-narrow">
+    <div class="panel enter">
+
+      <h1>Reset your password</h1>
+
+      <p class="muted text-small">
+        Enter the verification code sent to your phone,
+        then choose a new password.
+      </p>
+
+      <form method="post" novalidate data-guard>
+        {{ form.hidden_tag() }}
+
+        {{ field(
+          form.otp,
+          placeholder="123456",
+          autocomplete="one-time-code",
+          hint="Enter the verification code sent to your phone."
+        ) }}
+
+        {{ field(
+          form.password,
+          autocomplete="new-password",
+          hint="Use at least 8 characters."
+        ) }}
+
+        {{ field(
+          form.confirm,
+          autocomplete="new-password"
+        ) }}
+
+        {{ form.submit(
+          class="btn btn-primary btn-block btn-large press",
+          **{"data-busy-label": "Resetting…"}
+        ) }}
+      </form>
+
+      <hr>
+
+      <p class="text-small muted">
+        Didn't receive a code?
+        <a href="{{ url_for('auth.forgot_password') }}">
+          Request another code
+        </a>.
+      </p>
+
+      <p class="text-small muted">
+        Remember your password?
+        <a href="{{ url_for('auth.login') }}">Sign in</a>.
+      </p>
+
+    </div>
+  </div>
+</section>
+{% endblock %}
