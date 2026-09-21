@@ -132,13 +132,27 @@ def _register_filters(app):
 
     @app.template_filter("money")
     def format_money(value):
-        """Format a monetary amount as Ghana cedis."""
+        """Format a monetary amount already expressed in Ghana cedis."""
 
         if value is None:
             return "GHS 0.00"
 
         try:
             amount = float(value)
+        except (TypeError, ValueError):
+            return "GHS 0.00"
+
+        return f"GHS {amount:,.2f}"
+
+    @app.template_filter("pesewas")
+    def format_pesewas(value):
+        """Convert Ghana pesewas to Ghana cedis and format the amount."""
+
+        if value is None:
+            return "GHS 0.00"
+
+        try:
+            amount = int(value) / 100
         except (TypeError, ValueError):
             return "GHS 0.00"
 
