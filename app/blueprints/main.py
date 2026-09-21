@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 from flask import Blueprint, current_app, render_template
 
-from ..models import GalleryImage
+from ..models import GalleryImage, NFCOrder
 
 
 bp = Blueprint("main", __name__)
@@ -45,6 +45,64 @@ def _demo_profile():
     )
 
 
+def _nfc_pricing():
+    """Build public NFC product pricing from the NFCOrder source of truth."""
+
+    one_card_price, one_card_discount = (
+        NFCOrder.calculate_nfc_price(1)
+    )
+
+    five_card_price, five_card_discount = (
+        NFCOrder.calculate_nfc_price(5)
+    )
+
+    one_card_replacement, one_card_replacement_discount = (
+        NFCOrder.calculate_nfc_price(
+            1,
+            replacement=True,
+        )
+    )
+
+    five_card_replacement, five_card_replacement_discount = (
+        NFCOrder.calculate_nfc_price(
+            5,
+            replacement=True,
+        )
+    )
+
+    return {
+        "packages": {
+            1: {
+                "quantity": 1,
+                "price_minor": one_card_price,
+                "discount_minor": one_card_discount,
+                "price": one_card_price / 100,
+            },
+            5: {
+                "quantity": 5,
+                "price_minor": five_card_price,
+                "discount_minor": five_card_discount,
+                "price": five_card_price / 100,
+            },
+        },
+        "replacements": {
+            1: {
+                "quantity": 1,
+                "price_minor": one_card_replacement,
+                "discount_minor": one_card_replacement_discount,
+                "price": one_card_replacement / 100,
+            },
+            5: {
+                "quantity": 5,
+                "price_minor": five_card_replacement,
+                "discount_minor": five_card_replacement_discount,
+                "price": five_card_replacement / 100,
+            },
+        },
+        "replacement_discount": NFCOrder.REPLACEMENT_DISCOUNT,
+    }
+
+
 @bp.route("/")
 def index():
     """
@@ -69,6 +127,7 @@ def index():
         plans=current_app.config["PLANS"],
         currency=current_app.config["CURRENCY"],
         usd_ghs_rate=current_app.config["USD_GHS_RATE"],
+        nfc_pricing=_nfc_pricing(),
         demo_profile=_demo_profile(),
         gallery_images=gallery_images,
     )
@@ -83,4 +142,5 @@ def pricing():
         plans=current_app.config["PLANS"],
         currency=current_app.config["CURRENCY"],
         usd_ghs_rate=current_app.config["USD_GHS_RATE"],
+        nfc_pricing=_nfc_pricing(),
     )

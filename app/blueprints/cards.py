@@ -1,22 +1,21 @@
 """Public-facing card routes.
 
-These are the only pages a recipient ever sees, and they are the pages that
-carry the subscription rule: a card whose plan has lapsed stops resolving.
+These are the pages recipients use when they open a digital business card.
 """
+
+from datetime import timedelta
 
 from flask import (
     Blueprint,
     Response,
     abort,
     current_app,
+    flash,
+    redirect,
     render_template,
     request,
     url_for,
 )
-
-from datetime import timedelta
-
-from flask import flash, redirect, url_for
 
 from ..extensions import db
 from ..forms import LeadForm
@@ -30,15 +29,12 @@ bp = Blueprint("cards", __name__)
 
 
 def _record(profile, action="view"):
-    """Log the open. Failure here must never break the card.
-
-    Analytics are secondary to the card rendering. If the write fails the
-    visitor should still get the contact details, so the exception is
-    swallowed deliberately rather than allowed to 500 the page.
-    """
+    """Record a card interaction without breaking the card if analytics fail."""
     source = request.args.get("s", "link")
+
     if source not in ("link", "qr", "nfc"):
         source = "link"
+
     try:
         db.session.add(
             CardView(
@@ -55,32 +51,55 @@ def _record(profile, action="view"):
 
 
 def _lookup(slug):
+    """Find a public profile by slug."""
     profile = Profile.query.filter_by(slug=slug.lower()).first()
+
     if profile is None:
         abort(404)
+
     return profile
+
+
+def _card_url(profile, source=None):
+    """Build the public card URL.
+
+    source can be:
+        None -> normal/direct visit
+        qr   -> QR-code visit
+        nfc  -> NFC-tag visit
+    """
+    base_url = (
+        current_app.config["SITE_URL"].rstrip("/")
+        + url_for("cards.show", slug=profile.slug)
+    )
+
+    if source in ("qr", "nfc"):
+        return f"{base_url}?s={source}"
+
+    return base_url
 
 
 @bp.route("/c/<slug>")
 def show(slug):
+    """Display the public digital business card."""
     profile = _lookup(slug)
 
     if not profile.is_live:
-        # 410 Gone, not 404. The card existed and may return after renewal,
-        # and the status code tells crawlers exactly that.
         return (
             render_template("cards/inactive.html", profile=profile),
             410,
         )
 
     _record(profile, "view")
-    card_url = current_app.config["SITE_URL"].rstrip("/") + url_for("cards.show", slug=profile.slug)
+
+    card_url = _card_url(profile)
+    qr_url = _card_url(profile, "qr")
 
     return render_template(
         "cards/card.html",
         profile=profile,
         card_url=card_url,
-        qr=qr_svg(card_url, scale=5),
+        qr=qr_svg(qr_url, scale=5),
         vcf_url=url_for("cards.vcf", slug=profile.slug),
         lead_form=LeadForm(),
     )
@@ -88,26 +107,40 @@ def show(slug):
 
 @bp.route("/c/<slug>/card.vcf")
 def vcf(slug):
+    """Generate and return the contact as a vCard file."""
     profile = _lookup(slug)
+
     if not profile.is_live:
         abort(410)
 
     _record(profile, "vcf")
 
     photo_url = None
+
     if profile.avatar_filename:
-        photo_url = current_app.config["SITE_URL"].rstrip("/") + url_for(
-            "static", filename=f"img/avatars/{profile.avatar_filename}"
+        photo_url = (
+            current_app.config["SITE_URL"].rstrip("/")
+            + url_for(
+                "static",
+                filename=f"img/avatars/{profile.avatar_filename}",
+            )
         )
 
-    card_url = current_app.config["SITE_URL"].rstrip("/") + url_for("cards.show", slug=profile.slug)
-    payload = build_vcard(profile, card_url=card_url, photo_url=photo_url)
+    card_url = _card_url(profile)
+
+    payload = build_vcard(
+        profile,
+        card_url=card_url,
+        photo_url=photo_url,
+    )
 
     return Response(
         payload,
-        mimetype="text/vcard; charset=utf-8",
+        mimetype="text/vcard",
         headers={
-            "Content-Disposition": f'attachment; filename="{vcard_filename(profile)}"',
+            "Content-Disposition": (
+                f'inline; filename="{vcard_filename(profile)}"'
+            ),
             "Cache-Control": "no-store",
         },
     )
@@ -115,55 +148,58 @@ def vcf(slug):
 
 @bp.route("/c/<slug>/qr.png")
 def qr_png(slug):
+    """Return the QR code image for the public card."""
     profile = _lookup(slug)
+
     if not profile.is_live:
         abort(410)
-    card_url = current_app.config["SITE_URL"].rstrip("/") + url_for(
-        "cards.show", slug=profile.slug
-    )
+
+    qr_url = _card_url(profile, "qr")
+
     return Response(
-        qr_png_bytes(card_url + "?s=qr", scale=12),
+        qr_png_bytes(qr_url, scale=12),
         mimetype="image/png",
-        headers={"Content-Disposition": f'inline; filename="{profile.slug}-qr.png"'},
+        headers={
+            "Content-Disposition": (
+                f'inline; filename="{profile.slug}-qr.png"'
+            )
+        },
     )
 
 
 @bp.route("/c/<slug>/connect", methods=["POST"])
 def connect(slug):
-    """A visitor sends their own details back to the card owner.
-
-    This is the exchange a paper card cannot do. You hand someone a printed
-    card and hope they call; here they can push their number to you while you
-    are still standing together.
-
-    Three defences, in order of how often they matter:
-      1. A honeypot field, which catches naive bots for free.
-      2. A per-visitor rate limit, so one person cannot flood an inbox.
-      3. Length caps in the form, so nobody stores an essay.
-    """
+    """Receive a visitor's contact details."""
     profile = _lookup(slug)
+
     if not profile.is_live:
         abort(410)
 
     form = LeadForm()
 
     if form.is_bot:
-        # Answer as though it worked. A bot told it failed simply retries
-        # with the honeypot left empty.
-        flash("Thank you. Your details have been sent.", "success")
-        return redirect(url_for("cards.show", slug=profile.slug))
+        flash(
+            "Thank you. Your details have been sent.",
+            "success",
+        )
+        return redirect(
+            url_for("cards.show", slug=profile.slug)
+        )
 
     if not form.validate_on_submit():
-        card_url = current_app.config["SITE_URL"].rstrip("/") + url_for(
-            "cards.show", slug=profile.slug
-        )
+        card_url = _card_url(profile)
+        qr_url = _card_url(profile, "qr")
+
         return (
             render_template(
                 "cards/card.html",
                 profile=profile,
                 card_url=card_url,
-                qr=qr_svg(card_url, scale=5),
-                vcf_url=url_for("cards.vcf", slug=profile.slug),
+                qr=qr_svg(qr_url, scale=5),
+                vcf_url=url_for(
+                    "cards.vcf",
+                    slug=profile.slug,
+                ),
                 lead_form=form,
                 open_form=True,
             ),
@@ -171,7 +207,11 @@ def connect(slug):
         )
 
     fingerprint = visitor_hash()
-    since = (utcnow() - timedelta(hours=1)).replace(tzinfo=None)
+
+    since = (
+        utcnow() - timedelta(hours=1)
+    ).replace(tzinfo=None)
+
     recent = Lead.query.filter(
         Lead.profile_id == profile.id,
         Lead.visitor_hash == fingerprint,
@@ -179,29 +219,51 @@ def connect(slug):
     ).count()
 
     if recent >= 3:
-        flash("You have already sent your details. Give it an hour.", "warning")
-        return redirect(url_for("cards.show", slug=profile.slug))
+        flash(
+            "You have already sent your details. Give it an hour.",
+            "warning",
+        )
+        return redirect(
+            url_for("cards.show", slug=profile.slug)
+        )
 
     source = request.args.get("s", "link")
+
+    if source not in ("link", "qr", "nfc"):
+        source = "link"
+
     lead = Lead(
         profile=profile,
         name=form.name.data.strip(),
         phone=form.phone.data or None,
         email=(form.email.data or "").strip().lower() or None,
-        organisation=(form.organisation.data or "").strip() or None,
-        note=(form.note.data or "").strip() or None,
-        source=source if source in ("link", "qr", "nfc") else "link",
+        organisation=(
+            form.organisation.data or ""
+        ).strip() or None,
+        note=(
+            form.note.data or ""
+        ).strip() or None,
+        source=source,
         visitor_hash=fingerprint,
     )
+
     db.session.add(lead)
     db.session.commit()
 
-    # Notified after the commit, never before. A failing SMS gateway must not
-    # cost the card owner the lead itself.
     try:
         notify_new_lead(lead)
-    except Exception:  # noqa: BLE001 - the lead is saved; delivery is secondary
-        current_app.logger.exception("Lead notification failed")
+    except Exception:
+        current_app.logger.exception(
+            "Lead notification failed"
+        )
 
-    flash(f"Thank you. {profile.full_name.split()[0]} has your details.", "success")
-    return redirect(url_for("cards.show", slug=profile.slug))
+    first_name = profile.full_name.split()[0]
+
+    flash(
+        f"Thank you. {first_name} has your details.",
+        "success",
+    )
+
+    return redirect(
+        url_for("cards.show", slug=profile.slug)
+    )
