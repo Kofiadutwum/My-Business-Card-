@@ -5,6 +5,7 @@
 {% block content %}
 <section class="section">
   <div class="wrap">
+
     <div class="section-head enter">
       <h1>One payment a year</h1>
       <p>
@@ -14,50 +15,319 @@
       </p>
     </div>
 
+
+    <!-- Digital Business Card Plans -->
+    <div class="section-head enter">
+      <h2>Digital Business Cards</h2>
+      <p class="text-small muted">
+        Choose the digital business card plan that fits your needs.
+      </p>
+    </div>
+
     <div class="plan-grid">
       {% for key, plan in plans.items() %}
         <div class="panel lift enter enter-{{ loop.index }}">
+
           <h3>{{ plan.label }}</h3>
-          <p class="stat-value">{{ currency }} {{ '%.0f'|format(plan.amount_minor / 100) }}</p>
-          <p class="text-small muted">per year</p>
+
+          <!-- Main USD Price -->
+          <p class="stat-value">
+            US$
+            {{ '%.2f'|format((plan.amount_minor / 100) * usd_ghs_rate) }}
+          </p>
+
+          <!-- Secondary GHS Price -->
+          <p class="text-small muted">
+            ≈ {{ currency }}
+            {{ '%.0f'|format(plan.amount_minor / 100) }}
+          </p>
+
+          <p class="text-small muted">
+            per year
+          </p>
+
           <hr>
-          <p class="text-small">{{ plan.blurb }}</p>
-          <p class="text-small muted">Up to {{ plan.max_social_links }} social links.</p>
-          <a class="btn {% if key == 'professional' %}btn-primary{% else %}btn-ghost{% endif %} btn-block press"
-             href="{{ url_for('auth.register') }}">Choose {{ plan.label }}</a>
+
+          <p class="text-small">
+            {{ plan.blurb }}
+          </p>
+
+          <p class="text-small muted">
+            Up to {{ plan.max_social_links }} social links.
+          </p>
+
+          <a
+            class="btn {% if key == 'professional' %}btn-primary{% else %}btn-ghost{% endif %} btn-block press"
+            href="{{ url_for('auth.register') }}"
+          >
+            Choose {{ plan.label }}
+          </a>
+
         </div>
       {% endfor %}
     </div>
 
-    <div class="panel enter enter-4">
+
+    <!-- NFC Smart Cards -->
+    <div class="section-head enter" style="margin-top: 56px;">
+
+      <h2>NFC Smart Cards</h2>
+
+      <p>
+        Add a physical NFC smart card to your digital business card and let
+        people open your profile by simply tapping their compatible phone.
+      </p>
+
+      <p class="text-small muted">
+        Prices are shown in US dollars with the approximate Ghana cedi
+        equivalent based on the current exchange-rate setting.
+      </p>
+
+    </div>
+
+
+    <div class="plan-grid">
+
+      <!-- 1 NFC Card -->
+      <div class="panel lift enter">
+
+        <h3>1 NFC Card</h3>
+
+        <!-- Main USD Price -->
+        <p class="stat-value">
+          US$
+          {{ '%.2f'|format(nfc_pricing.packages[1].price * usd_ghs_rate) }}
+        </p>
+
+        <!-- Secondary GHS Price -->
+        <p class="text-small muted">
+          ≈ {{ currency }}
+          {{ '%.0f'|format(nfc_pricing.packages[1].price) }}
+        </p>
+
+        <p class="text-small muted">
+          one NFC card
+        </p>
+
+        <hr>
+
+        <p class="text-small">
+          One physical NFC smart card linked to your digital business card.
+        </p>
+
+        <p class="text-small muted">
+          Tap your card on a compatible phone to open your digital profile.
+        </p>
+
+        <a
+          class="btn btn-primary btn-block press"
+          href="{{ url_for('nfc.order') }}"
+        >
+          Request 1 NFC Card
+        </a>
+
+      </div>
+
+
+      <!-- 5 NFC Cards -->
+      <div class="panel lift enter">
+
+        <h3>5 NFC Cards</h3>
+
+        <!-- Main USD Price -->
+        <p class="stat-value">
+          US$
+          {{ '%.2f'|format(nfc_pricing.packages[5].price * usd_ghs_rate) }}
+        </p>
+
+        <!-- Secondary GHS Price -->
+        <p class="text-small muted">
+          ≈ {{ currency }}
+          {{ '%.0f'|format(nfc_pricing.packages[5].price) }}
+        </p>
+
+        <p class="text-small muted">
+          five NFC cards
+        </p>
+
+        <hr>
+
+        <p class="text-small">
+          A five-card NFC package for teams, staff members, business partners
+          or multiple locations.
+        </p>
+
+        <p class="text-small muted">
+          Five physical NFC smart cards linked to your digital card setup.
+        </p>
+
+        <a
+          class="btn btn-primary btn-block press"
+          href="{{ url_for('nfc.order') }}"
+        >
+          Request 5 NFC Cards
+        </a>
+
+      </div>
+
+
+      <!-- Card Replacement -->
+      <div class="panel lift enter">
+
+        <h3>Card Replacement</h3>
+
+        <!-- Main USD Price -->
+        <p class="stat-value">
+          US$
+          {{ '%.2f'|format(nfc_pricing.replacements[1].price * usd_ghs_rate) }}
+        </p>
+
+        <!-- Secondary GHS Price -->
+        <p class="text-small muted">
+          ≈ {{ currency }}
+          {{ '%.0f'|format(nfc_pricing.replacements[1].price) }}
+        </p>
+
+        <p class="text-small muted">
+          replacement for 1 NFC card
+        </p>
+
+        <hr>
+
+        <p class="text-small">
+          Need a replacement for a lost or damaged NFC card?
+          Replacement pricing includes the current replacement discount.
+        </p>
+
+        <p class="text-small muted">
+
+          1-card replacement:
+          {{ currency }}
+          {{ '%.0f'|format(nfc_pricing.replacements[1].price) }}
+
+          <br>
+
+          ≈ US$
+          {{ '%.2f'|format(nfc_pricing.replacements[1].price * usd_ghs_rate) }}
+
+          <br><br>
+
+          5-card replacement:
+          {{ currency }}
+          {{ '%.0f'|format(nfc_pricing.replacements[5].price) }}
+
+          <br>
+
+          ≈ US$
+          {{ '%.2f'|format(nfc_pricing.replacements[5].price * usd_ghs_rate) }}
+
+        </p>
+
+        <a
+          class="btn btn-ghost btn-block press"
+          href="{{ url_for('nfc.order') }}"
+        >
+          Request Replacement
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- NFC Request -->
+    <div
+      class="panel enter enter-4"
+      style="margin-top: 32px;"
+    >
+
+      <h3>Request an NFC Card</h3>
+
+      <p class="text-small">
+        Choose your NFC quantity or replacement option on the order page.
+        Your order will be processed through the same secure payment and
+        production workflow.
+      </p>
+
+      <div class="row">
+
+        <a
+          class="btn btn-primary press"
+          href="{{ url_for('nfc.order') }}"
+        >
+          Request NFC Card
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- Contact / Help -->
+    <div
+      class="panel enter enter-4"
+      style="margin-top: 24px;"
+    >
+
       <h3>Not sure which plan?</h3>
+
       <p class="text-small">
         Call or message us and we will set the card up with you. Most people
         are live within ten minutes.
       </p>
+
       <div class="row">
-        <a class="btn btn-primary press" href="tel:+233{{ config.SUPPORT_PHONE[1:] }}">
+
+        <a
+          class="btn btn-primary press"
+          href="tel:+233{{ config.SUPPORT_PHONE[1:] }}"
+        >
           {{ config.SUPPORT_PHONE }}
         </a>
-        <a class="btn btn-ghost press"
-           href="https://wa.me/233{{ config.SUPPORT_PHONE[1:] }}" rel="noopener">WhatsApp</a>
-        <a class="btn btn-ghost press" href="mailto:{{ config.SUPPORT_EMAIL }}">Email us</a>
+
+        <a
+          class="btn btn-ghost press"
+          href="https://wa.me/233{{ config.SUPPORT_PHONE[1:] }}"
+          rel="noopener"
+        >
+          WhatsApp
+        </a>
+
+        <a
+          class="btn btn-ghost press"
+          href="mailto:{{ config.SUPPORT_EMAIL }}"
+        >
+          Email us
+        </a>
+
       </div>
+
     </div>
 
-    <div class="panel enter enter-4">
+
+    <!-- Expiry Information -->
+    <div
+      class="panel enter enter-4"
+      style="margin-top: 24px;"
+    >
+
       <h3>What happens when a plan expires</h3>
+
       <p class="text-small">
-        The card stops resolving publicly and anyone opening the link sees a short
-        notice instead. Your details are not deleted. Signing in and renewing puts
-        the same card back at the same link, and contacts already saved on other
-        people's phones are unaffected — that file lives on their device now.
+        The card stops resolving publicly and anyone opening the link sees a
+        short notice instead. Your details are not deleted. Signing in and
+        renewing puts the same card back at the same link, and contacts already
+        saved on other people's phones are unaffected — that file lives on
+        their device now.
       </p>
+
       <p class="text-small muted">
-        There is a {{ config.GRACE_PERIOD_DAYS }}-day grace period after the expiry
-        date before the card goes dark.
+        There is a {{ config.GRACE_PERIOD_DAYS }}-day grace period after the
+        expiry date before the card goes dark.
       </p>
+
     </div>
+
   </div>
 </section>
 {% endblock %}
