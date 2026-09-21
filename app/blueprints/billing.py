@@ -2,14 +2,14 @@
 
 The flow, stated once so the code below reads clearly:
 
-    checkout  ->  user picks plan + channel
-              ->  a Payment row is written with status 'pending' BEFORE the
+    checkout ->  user picks plan + channel
+ ->  a Payment row is written with status 'pending' BEFORE the
                   gateway is called, so nothing can succeed at the gateway
                   without a local record to attach it to
-    card      ->  redirect to the hosted page, return to /callback, verify
-    momo      ->  charge created, user approves on the handset, /pending
+    card ->  redirect to the hosted page, return to /callback, verify
+    momo ->  charge created, user approves on the handset, /pending
                   polls until the webhook lands
-    webhook   ->  authoritative. Activates the subscription.
+    webhook ->  authoritative. Activates the subscription.
 """
 
 from flask import (
@@ -247,6 +247,7 @@ def otp(reference):
         "billing/otp.html",
         form=form,
         payment=payment,
+        provider_label=MOMO_PROVIDERS.get(payment.momo_provider, "your network"),
     )
 
 @bp.route("/status/<reference>")
@@ -313,7 +314,7 @@ def callback():
         )
     except PaymentError as exc:
         flash(
-            f"{exc} Your card was not charged twice — check again shortly.",
+            f"{exc} Your card was not charged twice - check again shortly.",
             "warning",
         )
         return redirect(url_for("dashboard.index"))

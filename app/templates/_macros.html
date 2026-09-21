@@ -10,9 +10,14 @@
 
 {# --- form field ---------------------------------------------------------- #}
 {% macro field(f, hint=None, placeholder=None, autocomplete=None) %}
+  {# Jinja macros collect any extra keyword arguments into the implicit
+     `kwargs` dict automatically - no need to declare **kwargs above, and
+     doing so is a syntax error in Jinja (unlike Python). This lets a
+     caller pass e.g. inputmode="numeric" through to the widget without
+     every macro user needing to know about it. #}
   <div class="field {% if f.errors %}field-error{% endif %}">
     {{ f.label }}
-    {{ f(placeholder=placeholder, autocomplete=autocomplete) }}
+    {{ f(placeholder=placeholder, autocomplete=autocomplete, **kwargs) }}
     {% for error in f.errors %}
       <span class="error-text">{{ error }}</span>
     {% endfor %}
@@ -51,7 +56,7 @@
      series: an ordered mapping of label -> value
      Renders a dense series, so zero days show as gaps rather than silently
      closing up and overstating activity.
-   ------------------------------------------------------------------------ #}
+ ------------------------------------------------------------------------ #}
 {% macro bar_chart(series, peak, height=140, caption=None, unit='') %}
   {% if series and peak > 0 %}
     {% set count = series|length %}
@@ -134,7 +139,7 @@
 {# --- the contact card ----------------------------------------------------
      One macro renders the card in the editor preview and on the public page,
      so the preview cannot drift from what visitors actually see.
-   ------------------------------------------------------------------------ #}
+ ------------------------------------------------------------------------ #}
 {% macro contact_card(profile, vcf_url=None, interactive=true, preview=false) %}
   <div class="card-stage">
     <article class="contact-card accent-{{ profile.accent or 'blue' }} {% if interactive %}tiltable deal-in{% endif %}"

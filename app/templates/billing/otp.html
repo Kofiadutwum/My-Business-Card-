@@ -1,41 +1,38 @@
-@'
-{% extends "base.html" %}
+{% extends "dashboard/_shell.html" %}
+{% from "_macros.html" import field %}
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h2 class="mb-3">Confirm your payment</h2>
+{% block title %}Confirm your payment - {{ config.SITE_NAME }}{% endblock %}
 
-                    <p class="text-muted">
-                        Enter the one-time code sent to you to complete your
-                        Mobile Money payment.
-                    </p>
+{% block console %}
+<div class="console-head enter">
+  <div>
+    <h1>Confirm your payment</h1>
+    <p>
+      {{ provider_label }} sent a one-time code to {{ payment.momo_phone }} to
+      approve this charge. Enter it below to continue.
+    </p>
+  </div>
+</div>
 
-                    <form method="post">
-                        {{ form.hidden_tag() }}
+<div class="panel enter enter-1">
+  <form method="post" novalidate data-guard>
+    {{ form.hidden_tag() }}
 
-                        <div class="mb-3">
-                            {{ form.otp.label(class="form-label") }}
-                            {{ form.otp(class="form-control", autocomplete="one-time-code", inputmode="numeric") }}
+    {{ field(
+      form.otp,
+      hint="Usually four to six digits, sent by SMS from " ~ provider_label ~ ".",
+      autocomplete="one-time-code",
+      inputmode="numeric"
+    ) }}
 
-                            {% for error in form.otp.errors %}
-                                <div class="text-danger small mt-1">{{ error }}</div>
-                            {% endfor %}
-                        </div>
+    {{ form.submit(class="btn btn-primary btn-block btn-large press", **{"data-busy-label": "Confirming..."}) }}
+  </form>
 
-                        {{ form.submit(class="btn btn-primary w-100") }}
-                    </form>
-
-                    <p class="text-muted small mt-3 mb-0">
-                        Reference: {{ payment.reference }}
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
+  <hr>
+  <p class="text-small muted">
+    Reference: {{ payment.reference }}. Did not get a code? Check your SMS
+    inbox - some networks take a minute - or start again from
+    <a href="{{ url_for('billing.checkout') }}">plan and payment</a>.
+  </p>
 </div>
 {% endblock %}
-'@ | Set-Content app\templates\billing\otp.html
