@@ -24,7 +24,7 @@ def _demo_profile():
         organisation="Ad graphics",
         phone=support_phone,
         whatsapp=support_phone,
-        email="adgraphics1@gmail.com",
+        email="adgraphics881@gmail.com",
         website=current_app.config.get(
             "SITE_URL",
             "",
