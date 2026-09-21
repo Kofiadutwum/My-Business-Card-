@@ -1,3 +1,4 @@
+```html
 {% extends "base.html" %}
 
 {% from "_macros.html" import contact_card %}
@@ -1105,7 +1106,6 @@
    ========================================================= */
 
 @media (max-width: 950px) {
-
     .ad-hero-grid {
         grid-template-columns: 1fr;
         gap: 55px;
@@ -1155,7 +1155,6 @@
 }
 
 @media (max-width: 650px) {
-
     .ad-wrap {
         width: min(calc(100% - 28px), var(--ad-max));
     }
@@ -1262,7 +1261,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-
     .ad-reveal,
     .ad-gallery-slide.is-active {
         animation: none;
@@ -1278,7 +1276,6 @@
 
 </style>
 
-
 <div class="ad-landing">
 
     <!-- =====================================================
@@ -1286,26 +1283,21 @@
          ===================================================== -->
 
     <header class="ad-topbar">
-
         <div class="ad-wrap ad-topbar-inner">
-
             <a
                 href="{{ url_for('main.index') }}"
                 class="ad-brand"
             >
                 <span class="ad-brand-mark">AD</span>
-
                 <span class="ad-brand-name">
                     {{ config.SITE_NAME }}
                 </span>
             </a>
 
-
             <nav
                 class="ad-nav"
                 aria-label="Main navigation"
             >
-
                 <a href="#how-it-works">
                     How it works
                 </a>
@@ -1324,60 +1316,38 @@
                 >
                     Build my card
                 </a>
-
             </nav>
-
         </div>
-
     </header>
-
 
     <!-- =====================================================
          HERO
          ===================================================== -->
 
     <section class="ad-hero">
-
         <div class="ad-wrap ad-hero-grid">
 
             <div class="ad-hero-copy ad-reveal">
 
                 <div class="ad-eyebrow">
-
                     <span class="ad-eyebrow-dot"></span>
-
                     Digital business cards
-
                 </div>
 
-
                 <h1 class="ad-hero-title">
-
                     Your contact details,
-
                     <span class="ad-gradient-text">
-
                         saved in one tap.
-
                     </span>
-
                 </h1>
 
-
                 <p class="ad-hero-lede">
-
                     Build your digital business card once.
-
                     Share it with a link, QR code or NFC tag.
-
                     Recipients can open your card directly and
-
                     save your contact details to their phone —
-
                     with no app required.
-
                 </p>
-
 
                 <div class="ad-actions">
 
@@ -1385,25 +1355,18 @@
                         class="ad-btn ad-btn-primary"
                         href="{{ url_for('auth.register') }}"
                     >
-
                         Build my card
-
                         <span style="margin-left: 8px;">
                             →
                         </span>
-
                     </a>
-
 
                     <a
                         class="ad-btn ad-btn-secondary"
                         href="{{ url_for('main.pricing') }}"
                     >
-
                         See pricing
-
                     </a>
-
 
                     <a
                         class="ad-btn ad-btn-whatsapp"
@@ -1411,58 +1374,42 @@
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-
                         WhatsApp
-
                     </a>
 
                 </div>
 
-
                 <div class="ad-proof-row">
 
                     <div class="ad-proof">
-
                         <strong>
                             One tap
                         </strong>
-
                         <span>
                             Open and save contact details
                         </span>
-
                     </div>
 
-
                     <div class="ad-proof">
-
                         <strong>
                             QR + NFC
                         </strong>
-
                         <span>
                             Multiple ways to share
                         </span>
-
                     </div>
 
-
                     <div class="ad-proof">
-
                         <strong>
                             No app
                         </strong>
-
                         <span>
                             Opens directly on compatible phones
                         </span>
-
                     </div>
 
                 </div>
-
             </div>
-
 
             <!-- DIGITAL CARD SHOWCASE -->
 
@@ -1473,33 +1420,22 @@
                     aria-hidden="true"
                 ></div>
 
-
                 <div class="ad-floating-badge qr">
-
                     <span class="ad-floating-icon">
                         QR
                     </span>
-
                     Scan to share
-
                 </div>
 
-
                 <div class="ad-floating-badge nfc">
-
                     <span class="ad-floating-icon">
                         NFC
                     </span>
-
                     Tap to share
-
                 </div>
 
-
                 <div class="ad-card-shell">
-
                     <div class="ad-card-inner">
-
                         {{
                             contact_card(
                                 demo_profile,
@@ -1507,17 +1443,13 @@
                                 interactive=true
                             )
                         }}
-
                     </div>
-
                 </div>
 
             </div>
 
         </div>
-
     </section>
-
 
     <!-- =====================================================
          HOW IT WORKS
@@ -1527,7 +1459,6 @@
         class="ad-section ad-section-soft"
         id="how-it-works"
     >
-
         <div class="ad-wrap">
 
             <div class="ad-section-heading ad-reveal">
@@ -1548,7 +1479,6 @@
 
             </div>
 
-
             <div class="ad-steps">
 
                 <article class="ad-step ad-reveal">
@@ -1568,7 +1498,6 @@
 
                 </article>
 
-
                 <article class="ad-step ad-reveal ad-delay-1">
 
                     <span class="ad-step-number">
@@ -1585,7 +1514,6 @@
                     </p>
 
                 </article>
-
 
                 <article class="ad-step ad-reveal ad-delay-2">
 
@@ -1605,11 +1533,8 @@
                 </article>
 
             </div>
-
         </div>
-
     </section>
-
 
     <!-- =====================================================
          WHY DIGITAL
@@ -1636,7 +1561,6 @@
                     experience that people can save, search and use.
                 </p>
 
-
                 <div class="ad-feature-points">
 
                     <div class="ad-feature-point">
@@ -1652,7 +1576,6 @@
 
                     </div>
 
-
                     <div class="ad-feature-point">
 
                         <strong>
@@ -1666,7 +1589,6 @@
 
                     </div>
 
-
                     <div class="ad-feature-point">
 
                         <strong>
@@ -1679,7 +1601,6 @@
                         </span>
 
                     </div>
-
 
                     <div class="ad-feature-point">
 
@@ -1695,9 +1616,7 @@
                     </div>
 
                 </div>
-
             </div>
-
 
             <div class="ad-feature-side ad-reveal ad-delay-1">
 
@@ -1721,7 +1640,6 @@
 
                 </div>
 
-
                 <a
                     class="ad-btn ad-btn-primary"
                     href="{{ url_for('auth.register') }}"
@@ -1732,9 +1650,7 @@
             </div>
 
         </div>
-
     </section>
-
 
     <!-- =====================================================
          GALLERY
@@ -1767,7 +1683,6 @@
 
             </div>
 
-
             <div
                 class="ad-gallery ad-reveal"
                 data-gallery
@@ -1794,7 +1709,6 @@
 
                         </div>
 
-
                         {% if image.title or image.description %}
 
                         <div class="ad-gallery-caption">
@@ -1806,7 +1720,6 @@
                             </h3>
 
                             {% endif %}
-
 
                             {% if image.description %}
 
@@ -1826,7 +1739,6 @@
 
                 </div>
 
-
                 {% if gallery_images|length > 1 %}
 
                 <button
@@ -1838,7 +1750,6 @@
                     ‹
                 </button>
 
-
                 <button
                     type="button"
                     class="ad-gallery-control ad-gallery-next"
@@ -1847,7 +1758,6 @@
                 >
                     ›
                 </button>
-
 
                 <div
                     class="ad-gallery-dots"
@@ -1873,13 +1783,11 @@
                 {% endif %}
 
             </div>
-
         </div>
 
     </section>
 
     {% endif %}
-
 
     <!-- =====================================================
          PRICING
@@ -1911,7 +1819,6 @@
 
             </div>
 
-
             <!-- DIGITAL BUSINESS CARD PLANS -->
 
             <div class="ad-pricing-grid">
@@ -1930,48 +1837,36 @@
 
                     {% endif %}
 
-
                     <h3>
                         {{ plan.label }}
                     </h3>
 
-
                     <!-- USD PRIMARY PRICE -->
 
                     <div class="ad-price">
-
                         US$
-
                         {{ '%.2f'|format(
                             (plan.amount_minor / 100)
                             * usd_ghs_rate
                         ) }}
-
                     </div>
-
 
                     <!-- GHS SECONDARY PRICE -->
 
                     <div class="ad-price-ghs">
-
                         {{ currency }}
-
                         {{ '%.0f'|format(
                             plan.amount_minor / 100
                         ) }}
-
                     </div>
-
 
                     <div class="ad-price-period">
                         per year
                     </div>
 
-
                     <p class="ad-price-description">
                         {{ plan.blurb }}
                     </p>
-
 
                     <a
                         class="ad-btn {% if key == 'professional' %}ad-btn-primary{% else %}ad-btn-secondary{% endif %}"
@@ -1985,7 +1880,6 @@
                 {% endfor %}
 
             </div>
-
 
             <!-- =================================================
                  NFC SMART CARD PRODUCTS
@@ -2011,7 +1905,6 @@
 
                 </div>
 
-
                 <div class="ad-nfc-grid">
 
                     <!-- 1 NFC CARD -->
@@ -2022,52 +1915,38 @@
                             NFC
                         </div>
 
-
                         <h4>
                             1 NFC Card
                         </h4>
 
-
                         <!-- USD PRIMARY PRICE -->
 
                         <div class="ad-nfc-price">
-
                             US$
-
                             {{ '%.2f'|format(
                                 nfc_pricing.packages[1].price
                                 * usd_ghs_rate
                             ) }}
-
                         </div>
-
 
                         <!-- GHS SECONDARY PRICE -->
 
                         <div class="ad-nfc-ghs">
-
                             {{ currency }}
-
                             {{ '%.0f'|format(
                                 nfc_pricing.packages[1].price
                             ) }}
-
                         </div>
-
 
                         <div class="ad-nfc-unit">
                             one physical NFC smart card
                         </div>
 
-
                         <p class="ad-nfc-description">
-
                             One NFC smart card linked to your digital
                             business card for convenient tap-to-share
                             networking.
-
                         </p>
-
 
                         <a
                             class="ad-btn ad-btn-primary"
@@ -2078,7 +1957,6 @@
 
                     </article>
 
-
                     <!-- 5 NFC CARDS -->
 
                     <article class="ad-nfc-card featured ad-reveal ad-delay-1">
@@ -2087,52 +1965,38 @@
                             5×
                         </div>
 
-
                         <h4>
                             5 NFC Cards
                         </h4>
 
-
                         <!-- USD PRIMARY PRICE -->
 
                         <div class="ad-nfc-price">
-
                             US$
-
                             {{ '%.2f'|format(
                                 nfc_pricing.packages[5].price
                                 * usd_ghs_rate
                             ) }}
-
                         </div>
-
 
                         <!-- GHS SECONDARY PRICE -->
 
                         <div class="ad-nfc-ghs">
-
                             {{ currency }}
-
                             {{ '%.0f'|format(
                                 nfc_pricing.packages[5].price
                             ) }}
-
                         </div>
-
 
                         <div class="ad-nfc-unit">
                             five physical NFC smart cards
                         </div>
 
-
                         <p class="ad-nfc-description">
-
                             A five-card package for teams, staff members,
                             business partners or multiple business
                             locations.
-
                         </p>
-
 
                         <a
                             class="ad-btn ad-btn-primary"
@@ -2143,7 +2007,6 @@
 
                     </article>
 
-
                     <!-- CARD REPLACEMENT -->
 
                     <article class="ad-nfc-card ad-reveal ad-delay-2">
@@ -2152,51 +2015,37 @@
                             ↻
                         </div>
 
-
                         <h4>
                             Card Replacement
                         </h4>
 
-
                         <!-- USD PRIMARY PRICE -->
 
                         <div class="ad-nfc-price">
-
                             US$
-
                             {{ '%.2f'|format(
                                 nfc_pricing.replacements[1].price
                                 * usd_ghs_rate
                             ) }}
-
                         </div>
-
 
                         <!-- GHS SECONDARY PRICE -->
 
                         <div class="ad-nfc-ghs">
-
                             {{ currency }}
-
                             {{ '%.0f'|format(
                                 nfc_pricing.replacements[1].price
                             ) }}
-
                         </div>
-
 
                         <div class="ad-nfc-unit">
                             replacement for 1 NFC card
                         </div>
 
-
                         <p class="ad-nfc-description">
-
                             Replace a lost or damaged NFC card while
                             keeping your digital business card setup.
-
                         </p>
-
 
                         <!-- REPLACEMENT PRICING -->
 
@@ -2240,7 +2089,6 @@
 
                         </div>
 
-
                         <a
                             class="ad-btn ad-btn-secondary"
                             href="{{ url_for('nfc.order') }}"
@@ -2251,7 +2099,6 @@
                     </article>
 
                 </div>
-
 
                 <!-- NFC CTA -->
 
@@ -2270,7 +2117,6 @@
 
                     </div>
 
-
                     <a
                         class="ad-btn ad-btn-primary"
                         href="{{ url_for('nfc.order') }}"
@@ -2281,11 +2127,8 @@
                 </div>
 
             </div>
-
         </div>
-
     </section>
-
 
     <!-- =====================================================
          FINAL CTA
@@ -2301,18 +2144,15 @@
                     Ready to share smarter?
                 </div>
 
-
                 <h2>
                     Leave the paper business card behind.
                 </h2>
-
 
                 <p>
                     Build your professional digital card,
                     share it anywhere and keep your contact
                     information up to date.
                 </p>
-
 
                 <div class="ad-final-actions">
 
@@ -2323,14 +2163,12 @@
                         Build my card →
                     </a>
 
-
                     <a
                         class="ad-btn ad-btn-secondary"
                         href="{{ url_for('main.pricing') }}"
                     >
                         View pricing
                     </a>
-
 
                     <a
                         class="ad-btn ad-btn-secondary"
@@ -2342,11 +2180,8 @@
                 </div>
 
             </div>
-
         </div>
-
     </section>
-
 
     <!-- =====================================================
          FOOTER
@@ -2368,7 +2203,6 @@
 
             </div>
 
-
             <div class="ad-footer-links">
 
                 <a
@@ -2377,13 +2211,11 @@
                     {{ config.SUPPORT_EMAIL }}
                 </a>
 
-
                 <a
                     href="tel:{{ config.SUPPORT_PHONE }}"
                 >
                     {{ config.SUPPORT_PHONE }}
                 </a>
-
 
                 <a
                     href="https://wa.me/233{{ config.SUPPORT_PHONE[1:] }}"
@@ -2393,13 +2225,11 @@
                     WhatsApp
                 </a>
 
-
                 <a
                     href="{{ url_for('main.pricing') }}"
                 >
                     Pricing
                 </a>
-
 
                 <a
                     href="{{ url_for('nfc.order') }}"
@@ -2408,20 +2238,16 @@
                 </a>
 
             </div>
-
         </div>
-
     </footer>
 
 </div>
-
 
 <!-- =========================================================
      GALLERY JAVASCRIPT
      ========================================================= -->
 
 <script>
-
 document.addEventListener("DOMContentLoaded", function () {
 
     const slider =
@@ -2430,7 +2256,6 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!slider) {
         return;
     }
-
 
     const slides =
         slider.querySelectorAll("[data-gallery-slide]");
@@ -2444,33 +2269,27 @@ document.addEventListener("DOMContentLoaded", function () {
     const next =
         slider.querySelector("[data-gallery-next]");
 
-
     if (slides.length <= 1) {
         return;
     }
 
-
     let current = 0;
     let timer = null;
-
 
     function showSlide(index) {
 
         current =
             (index + slides.length) % slides.length;
 
-
         slides.forEach(function (slide, i) {
 
             const active =
                 i === current;
 
-
             slide.classList.toggle(
                 "is-active",
                 active
             );
-
 
             slide.setAttribute(
                 "aria-hidden",
@@ -2479,18 +2298,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         });
 
-
         dots.forEach(function (dot, i) {
 
             const active =
                 i === current;
 
-
             dot.classList.toggle(
                 "is-active",
                 active
             );
-
 
             dot.setAttribute(
                 "aria-selected",
@@ -2498,23 +2314,18 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
         });
-
     }
-
 
     function startAutoSlide() {
 
         clearInterval(timer);
-
 
         timer = setInterval(function () {
 
             showSlide(current + 1);
 
         }, 5000);
-
     }
-
 
     if (previous) {
 
@@ -2523,14 +2334,11 @@ document.addEventListener("DOMContentLoaded", function () {
             function () {
 
                 showSlide(current - 1);
-
                 startAutoSlide();
 
             }
         );
-
     }
-
 
     if (next) {
 
@@ -2539,14 +2347,11 @@ document.addEventListener("DOMContentLoaded", function () {
             function () {
 
                 showSlide(current + 1);
-
                 startAutoSlide();
 
             }
         );
-
     }
-
 
     dots.forEach(function (dot) {
 
@@ -2562,9 +2367,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             }
         );
-
     });
-
 
     slider.addEventListener(
         "mouseenter",
@@ -2575,7 +2378,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     );
 
-
     slider.addEventListener(
         "mouseleave",
         function () {
@@ -2585,13 +2387,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     );
 
-
     showSlide(0);
-
     startAutoSlide();
 
 });
-
 </script>
 
 {% endblock %}
+```
