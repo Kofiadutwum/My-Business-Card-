@@ -1,191 +1,250 @@
 {% extends "dashboard/_shell.html" %}
 
-{% block title %}
-NFC Payment Status
-{% endblock %}
+{% block title %}NFC Payment Status{% endblock %}
 
-{% block content %}
+{% block console %}
 
-<div class="container py-5">
-
-    <div class="row justify-content-center">
-
-        <div class="col-lg-7">
-
-            <div class="card border-0 shadow-sm">
-
-                <div class="card-body p-4 p-lg-5">
-
-                    {% if nfc_order.payment_status == "success" %}
-
-                        <div class="text-center">
-
-                            <div
-                                class="mx-auto mb-4 d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10"
-                                style="width:72px;height:72px;"
-                            >
-                                <span
-                                    class="text-success"
-                                    style="font-size:32px;"
-                                >
-                                    ✓
-                                </span>
-                            </div>
-
-                            <h1 class="h3 fw-bold">
-                                Payment Successful
-                            </h1>
-
-                            <p class="text-muted">
-                                Your NFC card order has been received successfully.
-                            </p>
-
-                        </div>
-
-                    {% else %}
-
-                        <div class="text-center">
-
-                            <div
-                                class="mx-auto mb-4 d-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10"
-                                style="width:72px;height:72px;"
-                            >
-                                <span
-                                    class="text-warning"
-                                    style="font-size:30px;"
-                                >
-                                    …
-                                </span>
-                            </div>
-
-                            <h1 class="h3 fw-bold">
-                                Payment Processing
-                            </h1>
-
-                            <p class="text-muted">
-                                Your payment has not yet been confirmed.
-                                You can refresh this page shortly.
-                            </p>
-
-                        </div>
-
-                    {% endif %}
+<div class="console-head enter">
+    <div>
+        {% if nfc_order.payment_status == "success" %}
+            <h1>Payment successful</h1>
+            <p>
+                Your NFC card order has been received successfully.
+            </p>
+        {% elif nfc_order.payment_status == "failed" %}
+            <h1>Payment failed</h1>
+            <p>
+                We could not confirm your NFC card payment.
+            </p>
+        {% elif nfc_order.payment_status == "abandoned" %}
+            <h1>Payment abandoned</h1>
+            <p>
+                The payment was not completed.
+            </p>
+        {% else %}
+            <h1>Complete your payment</h1>
+            <p>
+                Check your phone and approve the Mobile Money payment request.
+            </p>
+        {% endif %}
+    </div>
+</div>
 
 
-                    <div class="border rounded-4 p-4 mt-4">
+<div class="panel enter enter-1">
 
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="text-muted">
-                                Order
-                            </span>
+    {% if nfc_order.payment_status == "success" %}
 
-                            <strong>
-                                {{ nfc_order.order_number }}
-                            </strong>
-                        </div>
-
-
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="text-muted">
-                                Order type
-                            </span>
-
-                            <strong>
-                                {% if nfc_order.order_type == "digital_and_nfc" %}
-                                    Digital Card + NFC
-                                {% elif nfc_order.order_type == "nfc_only" %}
-                                    NFC Cards Only
-                                {% else %}
-                                    NFC Replacement
-                                {% endif %}
-                            </strong>
-                        </div>
-
-
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="text-muted">
-                                NFC cards
-                            </span>
-
-                            <strong>
-                                {{ nfc_order.quantity }}
-                            </strong>
-                        </div>
-
-
-                        {% if nfc_order.digital_plan %}
-
-                            <div class="d-flex justify-content-between mb-3">
-                                <span class="text-muted">
-                                    Digital plan
-                                </span>
-
-                                <strong>
-                                    {{ nfc_order.digital_plan|capitalize }}
-                                </strong>
-                            </div>
-
-                        {% endif %}
-
-
-                        <hr>
-
-
-                        <div class="d-flex justify-content-between">
-
-                            <span class="fw-semibold">
-                                Total
-                            </span>
-
-                            <strong class="fs-5">
-                                {{ currency }}
-                                {{ "%.2f"|format(nfc_order.total_amount) }}
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    {% if nfc_order.payment_status != "success" %}
-
-                        <div class="text-center mt-4">
-
-                            <a
-                                href="{{ url_for(
-                                    'nfc.payment_status',
-                                    order_number=nfc_order.order_number
-                                ) }}"
-                                class="btn btn-primary"
-                            >
-                                Check Payment Again
-                            </a>
-
-                        </div>
-
-                    {% else %}
-
-                        <div class="text-center mt-4">
-
-                            <a
-                                href="{{ url_for('dashboard.index') }}"
-                                class="btn btn-primary"
-                            >
-                                Go to Dashboard
-                            </a>
-
-                        </div>
-
-                    {% endif %}
-
-                </div>
-
+        <div class="text-center">
+            <div class="status-icon success">
+                ✓
             </div>
 
+            <h2>Payment confirmed</h2>
+
+            <p class="muted">
+                Your NFC order has been received and is now being processed.
+            </p>
+
+            <a
+                href="{{ url_for('dashboard.index') }}"
+                class="btn btn-primary btn-large"
+            >
+                Go to Dashboard
+            </a>
+        </div>
+
+
+    {% elif nfc_order.payment_status in ["failed", "abandoned"] %}
+
+        <div class="text-center">
+            <div class="status-icon">
+                !
+            </div>
+
+            <h2>Payment not completed</h2>
+
+            <p class="muted">
+                Your NFC order has not been paid for.
+                You can return to the order page and try again.
+            </p>
+
+            <a
+                href="{{ url_for('nfc.order') }}"
+                class="btn btn-primary btn-large"
+            >
+                Try payment again
+            </a>
+        </div>
+
+
+    {% else %}
+
+        <div class="text-center">
+
+            <div class="status-icon">
+                …
+            </div>
+
+            <h2>Check your phone</h2>
+
+            <p class="muted">
+                A Mobile Money payment request has been sent to your phone.
+            </p>
+
+            <p class="muted">
+                Approve the request on your phone to complete the payment.
+            </p>
+
+            <div class="panel-subtle mt-4">
+                <strong id="payment-message">
+                    Waiting for payment confirmation…
+                </strong>
+
+                <p class="text-small muted mt-2">
+                    You can keep this page open. We will check automatically.
+                </p>
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <hr>
+
+
+    <div class="details-list">
+
+        <div class="details-row">
+            <span class="muted">Order</span>
+            <strong>{{ nfc_order.order_number }}</strong>
+        </div>
+
+        <div class="details-row">
+            <span class="muted">Order type</span>
+
+            <strong>
+                {% if nfc_order.order_type == "digital_and_nfc" %}
+                    Digital Card + NFC
+                {% elif nfc_order.order_type == "nfc_only" %}
+                    NFC Cards Only
+                {% else %}
+                    NFC Replacement
+                {% endif %}
+            </strong>
+        </div>
+
+        <div class="details-row">
+            <span class="muted">NFC cards</span>
+            <strong>{{ nfc_order.quantity }}</strong>
+        </div>
+
+        {% if nfc_order.digital_plan %}
+            <div class="details-row">
+                <span class="muted">Digital plan</span>
+                <strong>{{ nfc_order.digital_plan|capitalize }}</strong>
+            </div>
+        {% endif %}
+
+        <div class="details-row">
+            <span class="muted">Total</span>
+
+            <strong>
+                {{ currency }}
+                {{ "%.2f"|format(nfc_order.total_amount) }}
+            </strong>
         </div>
 
     </div>
 
 </div>
+
+
+{% if nfc_order.payment_status == "pending" %}
+
+<script>
+(function () {
+    const statusUrl = {{ url_for(
+        "nfc.payment_status_json",
+        order_number=nfc_order.order_number
+    )|tojson }};
+
+    const message = document.getElementById("payment-message");
+
+    let checking = false;
+
+    async function checkPayment() {
+        if (checking) {
+            return;
+        }
+
+        checking = true;
+
+        try {
+            const response = await fetch(statusUrl, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                },
+                cache: "no-store"
+            });
+
+            if (!response.ok) {
+                throw new Error("Payment status request failed.");
+            }
+
+            const data = await response.json();
+
+            if (data.status === "success") {
+                if (message) {
+                    message.textContent = "Payment confirmed. Redirecting…";
+                }
+
+                window.location.href = data.redirect;
+                return;
+            }
+
+            if (data.status === "failed") {
+                window.location.reload();
+                return;
+            }
+
+            if (data.status === "abandoned") {
+                window.location.reload();
+                return;
+            }
+
+            if (message) {
+                message.textContent =
+                    "Still waiting for your Mobile Money approval…";
+            }
+
+        } catch (error) {
+            console.error(
+                "NFC payment status check failed:",
+                error
+            );
+
+            if (message) {
+                message.textContent =
+                    "Still waiting for payment confirmation…";
+            }
+
+        } finally {
+            checking = false;
+        }
+    }
+
+    checkPayment();
+
+    setInterval(
+        checkPayment,
+        5000
+    );
+})();
+</script>
+
+{% endif %}
 
 {% endblock %}

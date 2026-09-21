@@ -1,0 +1,77 @@
+{% extends "dashboard/_shell.html" %}
+
+{% from "_macros.html" import field %}
+
+{% block title %}Confirm your NFC payment{% endblock %}
+
+{% block console %}
+
+<div class="console-head enter">
+    <div>
+        <h1>Confirm your payment</h1>
+
+        <p>
+            Paystack requires a one-time code to complete your
+            Mobile Money payment. Enter the code sent to your phone.
+        </p>
+    </div>
+</div>
+
+
+<div class="panel enter enter-1">
+
+    <form
+        method="post"
+        novalidate
+        data-guard
+    >
+
+        {{ form.hidden_tag() }}
+
+        {{ field(
+            form.otp,
+            hint="Enter the one-time code sent to your phone.",
+            autocomplete="one-time-code",
+            inputmode="numeric"
+        ) }}
+
+        {{ form.submit(
+            class="btn btn-primary btn-block btn-large press",
+            **{"data-busy-label": "Confirming..."}
+        ) }}
+
+    </form>
+
+
+    <hr>
+
+
+    <div class="panel-subtle">
+
+        <p class="text-small muted">
+            <strong>Order:</strong>
+            {{ nfc_order.order_number }}
+        </p>
+
+        <p class="text-small muted">
+            Enter the OTP exactly as received.
+            Your payment will be checked after the code is submitted.
+        </p>
+
+    </div>
+
+
+    <p class="text-small mt-4">
+        <a
+            href="{{ url_for(
+                'nfc.payment_status',
+                order_number=nfc_order.order_number
+            ) }}"
+        >
+            Return to payment status
+        </a>
+    </p>
+
+</div>
+
+{% endblock %}

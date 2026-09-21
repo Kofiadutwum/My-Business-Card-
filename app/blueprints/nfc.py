@@ -7,6 +7,7 @@ from flask import (
     Blueprint,
     current_app,
     flash,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -16,7 +17,7 @@ from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 
 from ..extensions import db
-from ..forms import NFCOrderForm
+from ..forms import NFCOrderForm, OtpForm
 from ..models import NFCOrder, utcnow
 from ..services import email as email_service
 from ..services import paystack
@@ -332,7 +333,8 @@ def _admin_notification_body(nfc_order):
         f"Replacement reason: {_display_replacement_reason(nfc_order.replacement_reason)}",
         "",
         "Design instructions:",
-        nfc_order.design_instructions or "No special design instructions provided.",
+        nfc_order.design_instructions
+        or "No special design instructions provided.",
         "",
     ]
 
@@ -494,7 +496,19 @@ def _verify_nfc_payment(nfc_order):
 
 
 def _send_to_paystack(nfc_order, form):
-    """Start the appropriate Paystack payment."""
+    """
+    Start the appropriate Paystack payment.
+
+    Card payments are sent to Paystack's hosted checkout.
+
+    Mobile Money can return several different states:
+        send_otp    -> send the customer to our OTP page.
+        pay_offline -> customer approves the request on their phone.
+        pending     -> continue waiting.
+        processing  -> continue waiting.
+        ongoing     -> continue waiting.
+        success     -> verify immediately.
+    """
 
     metadata = {
         "payment_type": "nfc_order",
@@ -515,6 +529,9 @@ def _send_to_paystack(nfc_order, form):
 
     channel = form.channel.data
 
+    # --------------------------------------------------------------
+    # CARD PAYMENT
+    # --------------------------------------------------------------
     if channel == "card":
         response = paystack.initialise_card(
             nfc_order.email,
@@ -537,6 +554,9 @@ def _send_to_paystack(nfc_order, form):
 
         return redirect(authorization_url)
 
+    # --------------------------------------------------------------
+    # MOBILE MONEY PAYMENT
+    # --------------------------------------------------------------
     if channel == "mobile_money":
         provider = form.momo_provider.data
 
@@ -560,6 +580,30 @@ def _send_to_paystack(nfc_order, form):
             else None
         )
 
+        # Paystack requires an OTP from the customer.
+        if gateway_status == "send_otp":
+            return redirect(
+                url_for(
+                    "nfc.payment_otp",
+                    order_number=nfc_order.order_number,
+                )
+            )
+
+        # Customer must approve the payment on their phone.
+        if gateway_status in {
+            "pay_offline",
+            "pending",
+            "processing",
+            "ongoing",
+        }:
+            return redirect(
+                url_for(
+                    "nfc.payment_status",
+                    order_number=nfc_order.order_number,
+                )
+            )
+
+        # Some payments can complete immediately.
         if gateway_status == "success":
             _verify_nfc_payment(nfc_order)
 
@@ -570,11 +614,14 @@ def _send_to_paystack(nfc_order, form):
                 )
             )
 
-        return redirect(
-            url_for(
-                "nfc.payment_status",
-                order_number=nfc_order.order_number,
-            )
+        gateway_message = (
+            response.get("display_text")
+            or response.get("message")
+            or "Paystack could not start the mobile money payment."
+        )
+
+        raise paystack.PaymentError(
+            gateway_message
         )
 
     raise paystack.PaymentError(
@@ -653,6 +700,115 @@ def order():
         replacement_discount=(
             NFCOrder.REPLACEMENT_DISCOUNT
         ),
+    )
+
+
+@bp.route(
+    "/payment/<order_number>/otp",
+    methods=["GET", "POST"],
+)
+@login_required
+def payment_otp(order_number):
+    """Collect an OTP required by Paystack for an NFC payment."""
+
+    nfc_order = NFCOrder.query.filter_by(
+        order_number=order_number,
+        user_id=current_user.id,
+    ).first_or_404()
+
+    if nfc_order.payment_status == "success":
+        return redirect(
+            url_for(
+                "nfc.payment_status",
+                order_number=nfc_order.order_number,
+            )
+        )
+
+    form = OtpForm()
+
+    if form.validate_on_submit():
+        try:
+            data = paystack.submit_otp(
+                form.otp.data,
+                nfc_order.payment_reference,
+            )
+
+            current_app.logger.info(
+                "NFC OTP submitted for %s: %s",
+                nfc_order.order_number,
+                data.get("status")
+                if data
+                else None,
+            )
+
+            # Paystack's OTP response is not treated as final
+            # confirmation. Verify through the normal payment path.
+            _verify_nfc_payment(nfc_order)
+
+            if nfc_order.payment_status == "success":
+                flash(
+                    "Payment successful. Your NFC order has been received.",
+                    "success",
+                )
+            else:
+                flash(
+                    "OTP submitted. Waiting for payment confirmation.",
+                    "success",
+                )
+
+            return redirect(
+                url_for(
+                    "nfc.payment_status",
+                    order_number=nfc_order.order_number,
+                )
+            )
+
+        except paystack.PaymentError as exc:
+            flash(
+                str(exc),
+                "error",
+            )
+
+    provider_label = "your mobile network"
+
+    return render_template(
+        "nfc/otp.html",
+        form=form,
+        nfc_order=nfc_order,
+        provider_label=provider_label,
+    )
+
+
+@bp.route(
+    "/payment/<order_number>/status",
+    methods=["GET"],
+)
+@login_required
+def payment_status_json(order_number):
+    """Return the current NFC payment status as JSON."""
+
+    nfc_order = NFCOrder.query.filter_by(
+        order_number=order_number,
+        user_id=current_user.id,
+    ).first_or_404()
+
+    if nfc_order.payment_status == "pending":
+        _verify_nfc_payment(nfc_order)
+
+    return jsonify(
+        {
+            "order_number": nfc_order.order_number,
+            "reference": nfc_order.payment_reference,
+            "status": nfc_order.payment_status,
+            "redirect": (
+                url_for(
+                    "nfc.payment_status",
+                    order_number=nfc_order.order_number,
+                )
+                if nfc_order.payment_status != "pending"
+                else None
+            ),
+        }
     )
 
 
