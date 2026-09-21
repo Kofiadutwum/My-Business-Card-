@@ -1,4 +1,4 @@
-import os
+﻿import os
 from datetime import datetime
 
 from flask import Flask, jsonify, render_template, request
@@ -68,54 +68,30 @@ def _register_errors(app):
     @app.errorhandler(404)
     def not_found(error):
         if request.path.startswith("/api/"):
-            return jsonify(
-                {
-                    "error": "Not found",
-                }
-            ), 404
+            return jsonify({"error": "Not found"}), 404
 
-        return render_template(
-            "errors/404.html",
-        ), 404
+        return render_template("errors/404.html"), 404
 
     @app.errorhandler(403)
     def forbidden(error):
         if request.path.startswith("/api/"):
-            return jsonify(
-                {
-                    "error": "Forbidden",
-                }
-            ), 403
+            return jsonify({"error": "Forbidden"}), 403
 
-        return render_template(
-            "errors/403.html",
-        ), 403
+        return render_template("errors/403.html"), 403
 
     @app.errorhandler(413)
     def request_too_large(error):
         if request.path.startswith("/api/"):
-            return jsonify(
-                {
-                    "error": "File too large",
-                }
-            ), 413
+            return jsonify({"error": "File too large"}), 413
 
-        return render_template(
-            "errors/413.html",
-        ), 413
+        return render_template("errors/413.html"), 413
 
     @app.errorhandler(500)
     def internal_server_error(error):
         if request.path.startswith("/api/"):
-            return jsonify(
-                {
-                    "error": "Internal server error",
-                }
-            ), 500
+            return jsonify({"error": "Internal server error"}), 500
 
-        return render_template(
-            "errors/500.html",
-        ), 500
+        return render_template("errors/500.html"), 500
 
 
 def _register_filters(app):
@@ -124,7 +100,7 @@ def _register_filters(app):
         if not value:
             return ""
 
-        return value.strftime("%-d %B %Y")
+        return f"{value.day} {value.strftime('%B %Y')}"
 
     @app.template_filter("month_name")
     def format_month_name(value):
@@ -153,6 +129,20 @@ def _register_filters(app):
             pass
 
         return str(value)
+
+    @app.template_filter("money")
+    def format_money(value):
+        """Format a monetary amount as Ghana cedis."""
+
+        if value is None:
+            return "GHS 0.00"
+
+        try:
+            amount = float(value)
+        except (TypeError, ValueError):
+            return "GHS 0.00"
+
+        return f"GHS {amount:,.2f}"
 
 
 def _register_context(app):
